@@ -1,0 +1,14 @@
+<!-- START: import.html -->
+<div>
+	<button type="submit" ng-click="connect();">Connect</button>
+	<button type="submit" ng-click="getLikes();">Get Likes</button>
+	<button type="submit" ng-click="importAll();">Import All</button>
+	<button type="submit" ng-click="deleteAll();">Delete All</button>
+
+	<ul class="track_import_list">
+		<li ng-repeat="track in tracks" class="track_import_item">
+			{{track.uploader}} - {{track.name}}
+		</li>
+	</ul>
+</div>
+<!-- END: import.html -->
