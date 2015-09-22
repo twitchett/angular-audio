@@ -1,0 +1,10 @@
+doctype html
+html
+	head
+		title= "Oops!"
+		link(rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css")
+
+	body
+		h1= message
+		h2= error.status
+		pre #{error.stack}

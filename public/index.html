@@ -1,0 +1,60 @@
+
+<html lang="en" ng-app="app">
+<head>
+	<link rel="stylesheet" href="/bower_components/html5-boilerplate/dist/css/normalize.css">
+	<link rel="stylesheet" href="/bower_components/html5-boilerplate/dist/css/main.css">
+</head>
+<body>
+
+	<script>
+		function gappy() {
+			alert('happy gappy');
+		}
+	</script>
+
+	<button id="authorize-button">Authorize</button>
+
+	<div ng-view></div>
+
+	<!-- external sources -->
+	<script src="http://connect.soundcloud.com/sdk.js"></script>
+	<script src="https://w.soundcloud.com/player/api.js"></script> <!-- for soundcloud HTML5 widget player -->
+	<script src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+
+	<!-- bower-managed -->
+	<script src="/bower_components/angular/angular.js"></script>
+	<script src="/bower_components/angular-route/angular-route.js"></script>
+	<script src="/bower_components/angular-resource/angular-resource.js"></script>
+	<script src="/bower_components/underscore/underscore.js"></script>
+
+	<!-- custom -->
+
+	<!-- core -->
+	<script src="/app/app.js"></script>
+	<script src="/app/core/logEnhancer.js"></script>
+	<script src="/app/core/trackModel.js"></script>
+	<script src="/app/core/trackService.js"></script>
+	<script src="/app/core/userService.js"></script>
+	<script src="/app/core/userModel.js"></script>
+
+	<!-- externals -->
+	<script src="/app/external/externals.js"></script>
+
+	<!-- components -->
+	<script src="/app/components/import/import.js"></script>
+	<script src="/app/components/import/importController.js"></script>
+	<script src="/app/components/import/importScService.js"></script>
+	<script src="/app/components/import/importYtService.js"></script>
+	
+	<script src="/app/components/library/library.js"></script>
+	<script src="/app/components/library/libraryController.js"></script>
+
+	<script src="app/version/version.js"></script>
+	<script src="app/version/version-directive.js"></script>
+	<script src="app/version/interpolate-filter.js"></script>
+
+
+	
+
+</body>
+</html>

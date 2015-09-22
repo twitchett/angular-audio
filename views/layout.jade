@@ -1,0 +1,22 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		link(rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css")
+
+		// put scripts at bottom of body for faster loading?
+			
+		// external js
+		script(src='//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js', type='text/javascript') 
+		script(src='//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js' type='text/javascript')
+		script(src='http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js' type='text/javascript')
+		script(src='http://connect.soundcloud.com/sdk.js')
+		//script(src='https://cdn.socket.io/socket.io-1.1.0.js')
+
+		// local js
+		script(src='/javascripts/playlists.js', type='text/javascript') 
+		script(src='/javascripts/ytplayer.js', type='text/javascript') 
+		script(src='/javascripts/sc_client.js', type='text/javascript') 
+	body
+		block content
