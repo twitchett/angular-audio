@@ -1,20 +1,16 @@
 
 <html lang="en" ng-app="app">
 <head>
-	<link rel="stylesheet" href="/bower_components/html5-boilerplate/dist/css/normalize.css">
-	<link rel="stylesheet" href="/bower_components/html5-boilerplate/dist/css/main.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
 
-	<script>
-		function gappy() {
-			alert('happy gappy');
-		}
-	</script>
-
-	<button id="authorize-button">Authorize</button>
-
-	<div ng-view></div>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div ng-view></div>
+		</div>
+	</div>
 
 	<!-- external sources -->
 	<script src="http://connect.soundcloud.com/sdk.js"></script>
@@ -34,27 +30,31 @@
 	<script src="/app/core/logEnhancer.js"></script>
 	<script src="/app/core/trackModel.js"></script>
 	<script src="/app/core/trackService.js"></script>
+	<script src="/app/core/trackFactory.js"></script>
 	<script src="/app/core/userService.js"></script>
 	<script src="/app/core/userModel.js"></script>
 
 	<!-- externals -->
 	<script src="/app/external/externals.js"></script>
+	<script src="/app/external/ui-bootstrap-tpls-0.13.4.js"></script>
 
 	<!-- components -->
 	<script src="/app/components/import/import.js"></script>
 	<script src="/app/components/import/importController.js"></script>
-	<script src="/app/components/import/importScService.js"></script>
-	<script src="/app/components/import/importYtService.js"></script>
-	
+	<script src="/app/components/import/yt/import.yt.js"></script>
+	<script src="/app/components/import/yt/importYtController.js"></script>
+	<script src="/app/components/import/yt/importYtService.js"></script>
+	<script src="/app/components/import/yt/importYtAuthService.js"></script>
+	<script src="/app/components/import/sc/importScService.js"></script>
+	<script src="/app/components/import/sc/importScAuthService.js"></script>
+
 	<script src="/app/components/library/library.js"></script>
 	<script src="/app/components/library/libraryController.js"></script>
+	<script src="/app/components/library/libraryService.js"></script>
 
 	<script src="app/version/version.js"></script>
 	<script src="app/version/version-directive.js"></script>
 	<script src="app/version/interpolate-filter.js"></script>
-
-
-	
 
 </body>
 </html>

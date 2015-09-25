@@ -1,10 +1,26 @@
 <!-- START: library.html -->
-<div>
-	<h2>Library</h2>
-	<ul class="library_track_list">
-		<li ng-repeat="track in tracks" class="library_track_item">
-			{{track.uploader}} - {{track.name}}
-		</li>
-	</ul>
+<div ng-controller="LibraryController as lib">
+	<button type="button" class="btn btn-default" ng-click="lib.openImport()">Open me!</button>
+
+	<div>
+		<h2>Library</h2>
+
+		<ul class="list-group library-list">
+
+			<li class="list-group-item playlist-item"
+				ng-repeat="track in lib.tracks" 
+				ng-click="lib.selectItem($index)"
+				ng-class="track.selected ? 'selected' : 'unselected'">
+
+				{{track.uploader}} - {{track.name}}
+			</li>
+		</ul>
+
+<!-- 		<ul class="library_track_list">
+			<li ng-repeat="track in lib.tracks" class="library_track_item">
+				{{track.uploader}} - {{track.name}}
+			</li>
+		</ul> -->
+	</div>
 </div>
 <!-- END: library.html -->
