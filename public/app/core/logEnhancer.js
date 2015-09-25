@@ -36,11 +36,16 @@
 	}
 
 	function LogEnhancerRun($log, logEnhancer) {
+		console.log('LogEnhancerRun');
 		logEnhancer.enhanceAngularLog($log);
 	}
 
+	function LogEnhancerConfig($log, logEnhancer) {
+		console.log('LogEnhancerConfig', $log, logEnhancer);
+	}
+
 	angular
-		.module('app')
+		.module('app.logEnhancer', [])
 		.provider('logEnhancer', [LogEnhancer])
 		.run(['$log', 'logEnhancer', LogEnhancerRun]);
 })();

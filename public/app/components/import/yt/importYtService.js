@@ -4,18 +4,25 @@
 
 	/*
 	* Encapsulates all external interactions with YouTube.
+	* Responsibility: to make requests to youtube and return TrackModels or playlist data
 	*/
-	function YTService($log, $http, $q, ytAuthService, trackService, PROPERTIES) {
-		// setup
+	function YTService($log, $http, $q, ytAuthService, trackFactory, PROPERTIES) {
+		
 		var YTService 	= {},
 			log 		= $log.getInstance('YTService');
 
 		var pageSize 	= 50; 	// number of results to return in API requests (default is 5, max is 50)
 
+		var VIDEO_URL 	= "https://www.youtube.com/watch?v=",
+			LIST_PARAM	= "&list="
+
+		/*
+		* Gets all playlists belonging to the user (no videos, only playlist names)
+		*/
 		YTService.getPlaylists = function() {
-			var playlists = [];
+			var playlists = [];				// results-array
 			var options = {
-				mine 		: 'true',  		// all "my" playlists
+				mine 		: 'true',  		// all playlists of logged-in user
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
 				maxResults  : pageSize		
 			}
@@ -23,17 +30,19 @@
 			// the executable request
 			var request = gapi.client.youtube.playlists.list(options);
 			
+			// returns a promise
 			return getAllPlaylists(request, options, playlists);
 		}
 
-
+		/* 
+		* Gets all videos in a single playlist
+		*/
 		YTService.getPlaylist = function(playlistId) {
-			console.log('ytAuthService.isReady' + ytAuthService.isReady())
 			var videos = [];
 			var options = {
-				playlistId 	: 'PLvQEooGTapii34T8hcaW0sRcGAGwxui_P',
+				playlistId 	: playlistId,
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
-				maxResults 	: 5		
+				maxResults 	: 50
 			}
 
 			// the executable request
@@ -41,6 +50,7 @@
 
 			console.log(request);
 			
+			// returns a promise
 			return getPlaylistItems(request, options, videos);
 		}
 
@@ -67,7 +77,7 @@
 					return getAllPlaylists(newRequest, options, results);
 
 				} else {
-					console.log('returning with ' + results.length);
+					log.debug('retrieved ' + results.length + ' playlists');
 					return results;
 				}
 			},
@@ -78,20 +88,23 @@
 		* Recursively gets all videos.
 		*/
 		var getPlaylistItems = function(request, options, results, count, limit) {	
+			log.debug('getPlaylistItems() request, num results=' + results.length + ' options ', options);
 			return request.then(function(response) {
 
 				var nextPageToken = response.result.nextPageToken;
 				var items = response.result.items;
 
 				for (var i = 0; i < items.length; i++) {
-					results.push(convertToTrackModel(items[i]));
+
+					var trackModel = convertToTrackModel(items[i]);			
+					if (trackModel) results.push(trackModel);
 				}
 
 				if (nextPageToken) {
 					options.pageToken = nextPageToken;
 					var newRequest 	= gapi.client.youtube.playlistItems.list(options);
 
-					return getAllPlaylists(newRequest, options, results);
+					return getPlaylistItems(newRequest, options, results);
 
 				} else {
 					console.log('returning with ' + results.length);
@@ -115,25 +128,59 @@
 
 		// converts JSON response from YouTube to TrackModel object
 		var	convertToTrackModel = function(data) {
-			console.log(data);
+			console.log('converting video ' , data);
 
-			try {
-				var trackData = {
-					src 		: 'yt',
-					srcId 		: data.snippet.resourceId.videoId,
-					name 		: data.snippet.title,
-					img_url 	: data.snippet.thumbnails.default.url,
-					uploader 	: data.snippet.channelTitle,
-					// ui-only attributes
-					displayName : data.snippet.title, 
+			if (!isUnavailable(data)) {
+				try {
+					var trackData = {
+						src 		: 'yt',
+						srcId 		: data.snippet.resourceId.videoId,
+						name 		: data.snippet.title,
+						description : data.snippet.description,
+						img_url 	: data.snippet.thumbnails.default.url,
+						uploader 	: data.snippet.channelTitle,
+						// ui-only attributes
+						displayName : data.snippet.title, 
+					}
+
+					var trackModel = trackFactory.createNew(trackData);
+
+					// add import-only attributes
+					return augmentProperties(trackModel, data);
+
+				} catch (error) {
+					log.error('convert to model error ', error);
+					log.debug('convertToModel failed for: ' + JSON.stringify(data, null, 4));
 				}
-
-				return trackService.createNew(trackData);
-
-			} catch (error) {
-				log.error('convert to model error ', error);
-				log.debug('convertToModel failed for: ' + JSON.stringify(data, null, 4));
+			} else {
+				log.warn('Video private/unavailable')
 			}
+		}
+
+		var augmentProperties = function(trackModel, data) {
+
+			// add a function that returns a link to this video in its playlist
+			trackModel.getViewInPlaylistUrl = function() {
+				return this.getSrcUrl() + LIST_PARAM + data.snippet.playlistId;
+			}
+
+			return trackModel;
+		}
+
+		// check if the video has been made private/unavailable
+		var isUnavailable = function(data) {
+			
+			// TODO: temporary method - this is not a reliable way of checking
+
+			var private_title = "Private video";
+			var private_description = "This video is private.";
+			var deleted_title = "Deleted video";
+			var deletec_description = "This video is unavailable.";
+
+			return (((private_title.localeCompare(data.snippet.title) === 0) 
+				&& (private_description.localeCompare(data.snippet.description) === 0)))
+			|| (((deleted_title.localeCompare(data.snippet.title) === 0) 
+				&& (deletec_description.localeCompare(data.snippet.description) === 0)));
 		}
 
 		var errorHandler = function(response) {
@@ -150,6 +197,6 @@
 
 	angular
 	 	.module('app.import.yt', ['app.logEnhancer'])
-		.factory('YTService', ['$log','$http', '$q', 'YTAuthService', 'TrackService', 'PROPERTIES', YTService]);
+		.factory('YTService', ['$log','$http', '$q', 'YTAuthService', 'TrackFactory', 'PROPERTIES', YTService]);
 
 })();

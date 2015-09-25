@@ -30,9 +30,17 @@
 		'app.external',
 
 		// custom app modules
+		'app.user',
 		'app.import',
-		'app.library'
+		'app.import.yt',
+		'app.import.sc',
+		'app.library',
 		//'app.version'
+		'app.logEnhancer',
+
+		// third party stuff
+		// bootstrap
+		'ui.bootstrap'
 	])
 
 	// config block

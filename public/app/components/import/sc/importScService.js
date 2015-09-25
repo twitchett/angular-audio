@@ -5,52 +5,30 @@
 	/*
 	* Encapsulates all external interactions with SoundCloud.
 	*/
-	function SCService($log, $http, $q, SC, trackService) {
-
+	function SCService($log, $http, $q, SC, scAuthService, trackFactory) {
 		// setup
 		var SCService 	= {},
 			log 		= $log.getInstance('SCService'),
 			ready		= false,
 			token 		= null; 	// oauth token
 
-		var OA_TOKEN_URL 	= '/sc/getOAToken',
-			SC_STREAM_URL 	= '/tracks/', 			// needed?
+		var SC_STREAM_URL 	= '/tracks/', 			// needed?
 			SC_FAVS_URL		= 'https://api.soundcloud.com/me/favorites.json?order=favourited_at',
 			RESULTS_LIMIT 	= 200;
 
 		// public methods
 
-		SCService.connect = function() {
-			var q1 = $q.defer();
-
-			SC.connect(function(data) {
-
-				$http.get(OA_TOKEN_URL).then(function(response) {
-					log.debug('got OAuth token for user ');
-					token = response.data;
-					q1.resolve();
-				},
-				function(error) {
-					q1.reject('could not get OAuth token');
-				});
-
-			});
-
-			return q1.promise;
-		};
-
 
 		SCService.getFavourites = function() {
-			var q = $q.defer();
-
-			if (!token) {
+			if (!scAuthService.isReady()) {
 				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
-				var rejection = q.reject('user not authenticated');
-				return q.promise;
+				return $q.reject('user not authenticated');
 			} 
 
+			var d = $q.defer();
+			
 			var options = { 
-				oauth_token	: token,
+				oauth_token	: scAuthService.getToken(),
 				limit		: RESULTS_LIMIT
 			}
 			log.debug('making request to ' + SC_FAVS_URL + ' with options ', options);
@@ -58,8 +36,8 @@
 			// TODO: pagination
 			SC.get(SC_FAVS_URL, options, function(data, error) {
 				if (error) {
-					q.reject('error making request to ' + SC_FAVS_URL + ': ' + error);
-					return q.promise;
+					d.reject('error making request to ' + SC_FAVS_URL + ': ' + error);
+					return d.promise;
 				}
 
 				var tracks = [];
@@ -69,18 +47,10 @@
 				}
 
 				log.debug('getFavourites() got ' + tracks.length + ' items');
-				q.resolve(tracks);
+				d.resolve(tracks);
 			});
 
-			return q.promise;
-		}
-
-		SCService.isConnected = function() {
-			return (token != null);
-		}
-
-		SCService.disconnect = function() {
-			token = null;
+			return d.promise;
 		}
 
 		// private methods
@@ -102,7 +72,7 @@
 						// ui-only attributes
 						displayName: data.user.username + ' ' + data.title 
 					}
-					return trackService.createNew(trackData);
+					return trackFactory.createNew(trackData);
 				} else {
 					log.warn(data.kind + ' not converted. only soundcloud tracks are currently supported.');
 				}
@@ -115,25 +85,8 @@
 		return SCService;
 	}
 
-	function SCRun($log, $http, SoundCloud, PROPERTIES, SCService) {
-		if (SoundCloud) {
-			// client id & redirect uri held in properties file (temporary implementation)
-			$http.get(PROPERTIES.CONFIGS).then(function(response) {
-				var sc_client_id = response.data.sc.client_id;
-				var sc_redirect_uri = response.data.sc.redirect_uri;
-				SoundCloud.initialize({
-					client_id		: sc_client_id,
-				 	redirect_uri	: sc_redirect_uri
-				});
-			})
-		} else {
-			$log.error('SC object not found on page. Cannot connect to SoundCloud.');
-		}
-	}
-
 	angular
-		.module('app.import')
-		.run(['$log', '$http', 'SC', 'PROPERTIES', 'SCService', SCRun])
-		.factory('SCService', ['$log','$http', '$q', 'SC', 'TrackService', SCService]);
+		.module('app.import.sc', ['app.logEnhancer'])
+		.factory('SCService', ['$log','$http', '$q', 'SC', 'SCAuthService', 'TrackFactory', SCService]);
 
 })();

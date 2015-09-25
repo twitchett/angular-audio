@@ -1,0 +1,36 @@
+<div class="modal-body">
+
+	<div class="columnA">
+		<div ng-show="import.isConnected('yt')">
+			You are already signed in to YouTube, import some shit!
+
+			<button class="btn btn-primary start" ng-click="import.nextState('yt')">Go >>></button>
+		</div>
+
+		<div ng-show="!import.isConnected('yt')">
+			Sign in with Google to import your YouTube shit:
+
+			<button class="btn btn-primary sign-in" ng-click="import.connect('yt')">Sign in</button>
+		</div>
+
+	</div>
+
+	<div class="columnB">
+		<div ng-show="import.isConnected('sc')">
+			You are connected to Soundcloud as someone, import some stuff
+			<button class="btn btn-primary start" ng-click="import.nextState('sc')">Sign in</button>
+		</div>
+
+		<div ng-show="!import.isConnected('sc')">
+			Sign in with SoundCloud to import your SoundCloud shit:
+			<button class="btn btn-primary sign-in" ng-click="import.connect('sc')">Sign in</button>
+		</div>
+
+	</div>
+
+	<div style="clear: both;"></div>
+</div>
+
+<div class="modal-footer">
+
+</div>
