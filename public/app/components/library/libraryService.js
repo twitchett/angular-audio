@@ -15,6 +15,7 @@
 		LibraryService.getLibrary = getLibrary;
 
 		function getLibrary(refresh) {
+			log.debug('getLibrary() ')
 			if (refresh === false) return library; // do not resolve (!?)
 
 			var q = $q.defer();
@@ -37,7 +38,7 @@
 	}
 
 	angular
-		.module('app.library')
+		.module('app')
 		.factory('LibraryService', ['$log', '$q', '$http', 'TrackService', LibraryService]);
 
 })();
