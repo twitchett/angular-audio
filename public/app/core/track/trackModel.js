@@ -29,6 +29,7 @@
 				name		: null,
 				genre		: null,
 				uploader	: null,
+				src_url 	: null,
 				stream_url	: null,
 				img_url		: null,
 
@@ -53,7 +54,7 @@
 				return "https://www.youtube.com/watch?v=" + this.srcId;
 			}
 			if (this.src === 'sc') {
-				// TODO
+				return this.src_url;
 			}
 		}
 
@@ -70,7 +71,7 @@
 	};
 
 	angular
-		.module('app')
+		.module('app.track')
 		.factory('TrackModel', [TrackModel]);
 
 })();

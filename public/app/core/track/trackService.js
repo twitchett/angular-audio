@@ -7,6 +7,7 @@
 	* Methods accept & return TrackModel objects.
 	*/
 	function TrackService($log, $http, $q, userService, TrackModel) {
+		console.log('in TrackService')
 
 		var TrackService = {};
 		var log = $log.getInstance('TrackService');
@@ -30,7 +31,7 @@
 			return $http.post(postUrl, postData)
 				.then(function(response) {	// response: data, status, headers, config
 					log.debug('saved track: ' + trackModel);
-					return response.data;
+					return new TrackModel(response.data);
 				},
 				function(response){
 					log.debug('error saving track: ' , response);
@@ -54,6 +55,7 @@
 			return $http.post(postUrl, postData)
 				.then(function(response) {
 					log.debug('imported ' + response.data.length + ' tracks' );
+					//return trackFactory.convertAll(response.data);
 					return response.data;
 				},
 		 		function(response) {
@@ -117,7 +119,7 @@
 	}
 
 	angular
-		.module('app')
+		.module('app.track')
 		.factory('TrackService', ['$log', '$http', '$q', 'UserService', 'TrackModel', TrackService]);
 
 })();

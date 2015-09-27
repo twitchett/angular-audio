@@ -57,6 +57,6 @@
 	}
 
 	angular
-		.module('app.user', ['app.logEnhancer'])
+		.module('app.user')
 		.factory('UserService', ['$log', '$http', 'UserModel', 'YTAuthService', 'SCAuthService', UserService]);
 })();

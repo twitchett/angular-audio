@@ -21,7 +21,7 @@
 	}
 
 	angular
-		.module('app')
+		.module('app.user')
 		.factory('UserModel', [UserModel]);
 
 })();

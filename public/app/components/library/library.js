@@ -2,9 +2,12 @@
 
 	'use strict';
 
-	/* creates 'app.library' module. declare dependencies here. */
-
 	angular
-		.module('app.library', ['ngRoute']);
+		.module('app.library', ['ngRoute', 'app.logEnhancer', 'app.user'])
+		.constant('LIBRARY', function() {
+			return {
+				// TODO
+			}
+		});
 
 })();

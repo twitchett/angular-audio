@@ -168,7 +168,7 @@
 
 	// angular config
 	angular
-		.module('app.import')
+		.module('app.import.yt')
 		.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/import/yt', {
 				//templateUrl: 'app/components/library/library.html',
