@@ -51,6 +51,50 @@
 			return d.promise;
 		}
 
+		SCService.getNewFavourites = function() {
+			if (!scAuthService.isReady()) {
+				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
+				return $q.reject('user not authenticated');
+			} 
+
+			var d = $q.defer();
+			
+			var options = { 
+				oauth_token	: scAuthService.getToken(),
+				limit		: RESULTS_LIMIT
+			}
+			log.debug('making request to ' + SC_FAVS_URL + ' with options ', options);
+			
+			// TODO: pagination
+			SC.get(SC_FAVS_URL, options, function(data, error) {
+				if (error) {
+					d.reject('error making request to ' + SC_FAVS_URL + ': ' + error);
+					return d.promise;
+				}
+
+				angular.forEach(data, function(item, idx) {
+					var model = convertToModel(data[i]);
+					if (model) {
+						if (model.getImportStatus() === 'none') {
+							return;
+						}
+						tracks.push(model);
+					}
+				});
+	
+
+				var tracks = [];
+				for (var i = 0; i < data.length; i++) {
+
+				}
+
+				log.debug('getFavourites() got ' + tracks.length + ' items');
+				d.resolve(tracks);
+			});
+
+			return d.promise;
+		}
+
 		// private methods
 
 		// converts JSON response from soundcloud to TrackModel object

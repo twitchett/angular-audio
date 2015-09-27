@@ -38,7 +38,7 @@
 	}
 
 	angular
-		.module('app')
+		.module('app.library')
 		.factory('LibraryService', ['$log', '$q', '$http', 'TrackService', LibraryService]);
 
 })();

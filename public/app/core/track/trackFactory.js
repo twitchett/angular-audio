@@ -57,7 +57,7 @@
 	}
 
 	angular
-		.module('app')
+		.module('app.track')
 		.factory('TrackFactory', ['$log', 'LibraryService', 'TrackModel', TrackFactory]);
 
 })();

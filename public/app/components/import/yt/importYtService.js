@@ -196,7 +196,7 @@
 	}
 
 	angular
-	 	.module('app.import.yt', ['app.logEnhancer'])
+	 	.module('app.import.yt')
 		.factory('YTService', ['$log','$http', '$q', 'YTAuthService', 'TrackFactory', 'PROPERTIES', YTService]);
 
 })();

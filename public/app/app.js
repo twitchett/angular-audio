@@ -15,8 +15,8 @@
 		'app.import',
 		'app.import.yt',
 		'app.import.sc',
-		//'app.library',
-		//'app.track',
+		'app.library',
+		'app.track',
 		//'app.version'
 		'app.logEnhancer',
 

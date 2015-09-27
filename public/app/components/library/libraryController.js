@@ -100,7 +100,7 @@
 
 	// angular config
 	angular
-		.module('app')
+		.module('app.library')
 		.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/library', {
 				templateUrl: 'app/components/library/library.html',
