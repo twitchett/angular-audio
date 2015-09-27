@@ -12,11 +12,13 @@ var access_token = '';
 
 router.get('/auth', function(req, res){
 	authCode = req.query.code;
-	logger.info('/sc/auth: OA2 step 1: got auth code ' + req.query.code);
+	logger.debug('/sc/auth: OA2 step 1: got auth code ' + req.query.code);
 	res.render('sccallback');
 })
 
 router.get('/getOAToken', function(req, res) {
+	logger.debug('/sc/getOAToken: OA step 2: requesting token from soundcloud.com ')
+	
 	// construct data object 
 	var config = JSON.parse(fs.readFileSync('./config.json'));
 	var data = qs.stringify({
@@ -38,7 +40,6 @@ router.get('/getOAToken', function(req, res) {
 		}
 	}
 
-	logger.debug('/sc/getOAToken: requesting token from soundcloud.com ')
 	var scReq = https.request(options, function(scRes) {
 		scRes.setEncoding('utf8');
 		var str = '';

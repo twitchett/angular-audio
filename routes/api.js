@@ -18,6 +18,18 @@ router.get('/api/library/:id', function(req, res) {
 	logger.info('GET /api/library/id with ' + util.inspect(req.params));
 	var userId = req.params.id;
 
+	// TODO: make this call with promises
+	//
+	// Track.findByUserId(userId).then(function(tracks) {
+	// 	res.writeHead(200, {'Content-Type': 'application/json'});
+	// 	res.end(JSON.stringify(tracks));	
+	// },
+	// function(error) {
+	// 	logger.error(err);
+	// 	res.writeHead(400, {'Content-Type': 'application/json'});
+	// 	res.end();
+	// });
+
 	Track.findByUserId(userId, function(err, tracks) {
 		if (err) {
 			logger.error(err);
@@ -52,89 +64,51 @@ router.delete('/api/track/:id', function(req, res) {
 router.post('/api/track/:id', function(req, res) {
 	console.log('POST /api/track got req ' + util.inspect(req.body));
 	var data = req.body;
-	Track.create(data, function(err, data) {
-		if (err) {
-			logger.error(err);
-			if (err.code === 11000) { // duplicate key
-				res.writeHead(403, {'Content-Type': 'application/json'});
-				res.end(JSON.stringify('track already exists'));
-			} else {
-				res.writeHead(500, {'Content-Type': 'application/json'});
-				res.end(JSON.stringify('error saving track'));
-			}
+
+	Track.create(data).then(function(track) {
+		logger.info('created track ', track)
+		res.writeHead(200, {'Content-Type': 'application/json'});
+		res.end(JSON.stringify(data));
+	},
+	function(error) {
+		logger.error('error creating track', err);
+		if (err.code === 11000) { // duplicate key - assuming it is srcId (dangerous!)
+			res.writeHead(403, {'Content-Type': 'application/json'});
+			res.end(JSON.stringify('error: track already exists'));
 		} else {
-			logger.info(data)
-			res.writeHead(200, {'Content-Type': 'application/json'});
-			res.end(JSON.stringify(data));
+			res.writeHead(500, {'Content-Type': 'application/json'});
+			res.end(JSON.stringify('error: could not save track'));
 		}
 	});
 });
 
 
 // HTTP POST: adds a collection of tracks
-//
-// NOTE #1: we can pass an array to Track.create, but then the callback-data is
-// only the NUMBER of items created, not the actual items. we should return a
-// list of the created models (in the same order as we got them).
-//
-// NOTE #2: but Track.create does not do a batch insert - for this we need to use
-// the native mongoDB driver (which will bypass all mongoose hooks)
-//
 router.post('/api/tracks/:id', function(req, res) {
 	if (req.body && req.body.length) {
 		logger.info('POST /api/tracks got this number of tracks: ' + util.inspect(req.body.length));
 
 		var tracks = req.body,
-			userId = req.params.userId,
-			counter = 0,
-			errors = 0,
-			returnTracks = [];
+			userId = req.params.userId;
 
-		// tracks = tracks.slice(1,10); // testing on subset
+		/*
+		* NOTE: if one fails, no tracks are written and an error is retrned.
+		* MongoDB provides a 'continueOnError' flag, however this is not supported by Mongoose.
+		*/
+		Track.create(tracks).then(function(data) {
+			logger.info('created tracks! data ', data);
+			res.end(JSON.stringify(data));
+		},
+		function(error) {
+			logger.debug('creating tracks failed: ', error);
+			var msg = 'error: could not add tracks';
+			if (error.code === 11000) {
+				msg = 'error: duplicate track(s) found'
+			} 
+			res.writeHead(403, {'Content-Type': 'application/json'});
+			res.end(JSON.stringify(msg));
+		});
 
-
-		for (var i=0; i<tracks.length; i++) {
-			logger.info('creating track at position ' + i + ' of ' + tracks.length);		
-			Track.create(tracks[i], function(err, data) {
-				counter++;
-				if (!err) {				
-					returnTracks.push(true);
-				} else {
-					errors++;
-					returnTracks.push(false);
-					logger.error('error ' + err + ', could not create track ', data)
-				}
-				// TODO: refactor
-				if (counter == tracks.length) {
-					res.writeHead(200, {'Content-Type': 'application/json'});
-					logger.info('writing output: ' + JSON.stringify(returnTracks));
-					res.end(JSON.stringify(returnTracks));
-				} else {
-					// return error to client
-				}
-			});
-		}
-
-		// for (var i=0; i<tracks.length; i++) {
-		// 	logger.info('creating track at position ' + i + ' of ' + tracks.length);		
-		// 	Track.create(tracks[i], function(err, data) {
-		// 		counter++;
-		// 		if (!err) {				
-		// 			returnTracks.push(data);
-		// 		} else {
-		// 			errors++;
-		// 			logger.error('error ' + err + ', could not create track ', data)
-		// 		}
-		// 		// TODO: refactor
-		// 		if (counter == tracks.length) {
-		// 			res.writeHead(200, {'Content-Type': 'application/json'});
-		// 			logger.info('writing output: ' + JSON.stringify(returnTracks));
-		// 			res.end(JSON.stringify(returnTracks));
-		// 		} else {
-		// 			// return error to client
-		// 		}
-		// 	});
-		// }
 	} else {
 		logger.warn('got /api/tracks/ request with no data')
 	}
@@ -144,7 +118,7 @@ router.post('/api/tracks/:id', function(req, res) {
 router.put('/api/track/:id', function(req, res) {
 	logger.info('PUT /api/track with ' + util.inspect(req.body));
 	var data = req.body;
-	Track.findOneAndUpdate({ _id: req.body._id }, req.body, function(err, data) {
+	Track.findOneAndUpdate({ _id: data._id }, data, function(err, data) {
 		if (err) {				
 			logger.error(err);
 			res.writeHead(400, {'Content-Type': 'application/json'});
