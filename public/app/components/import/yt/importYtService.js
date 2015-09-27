@@ -42,7 +42,7 @@
 			var options = {
 				playlistId 	: playlistId,
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
-				maxResults 	: 50
+				maxResults 	: pageSize
 			}
 
 			// the executable request

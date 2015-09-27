@@ -2,25 +2,6 @@
 	
 	'use strict';
 
-	/* 
-	app structure:
-
-	app module
-		- UserService
-		- UserModel
-		- TrackService
-		- TrackModel
-		- app.import
-			- ImportController
-			- ImportSCService
-			- ImportYTService
-		- app.library 
-			- LibraryController
-		- app.external
-			- SC, _
-		- logEnhancerProvider
-	*/
-
 	angular.module('app', [
 		// angular modules
 		'ngRoute',
@@ -34,7 +15,8 @@
 		'app.import',
 		'app.import.yt',
 		'app.import.sc',
-		'app.library',
+		//'app.library',
+		//'app.track',
 		//'app.version'
 		'app.logEnhancer',
 
