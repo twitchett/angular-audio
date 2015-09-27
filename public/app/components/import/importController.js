@@ -5,7 +5,7 @@
 	/*
 	* Import controller
 	*/ 
-	function ImportController($log, $scope, $modalInstance, scService, ytService, trackService, userService) {
+	function ImportController($log, $scope, $modalInstance, scService, trackService, userService) {
 
 		var log	= $log.getInstance('ImportController'),
 			vm	= this;
@@ -18,7 +18,7 @@
 					next : 's1'
 				},
 				s1 : {
-					url  : 'app/components/import/yt/import-1-yt_playlists.html',
+					url  : 'app/components/import/yt/import-1-yt.html',
 					next : ''
 				}
 			}
@@ -52,13 +52,15 @@
 				});
 		}
 
-		vm.getLikes = function() {
-			scService.getFavourites().then(function(data) {
-				logger.debug('got number of tracks: ' + data.length)
-				$scope.tracks = data;
+		vm.getSCTemp = function() {
+			scService.getFavourites().then(function(scData) {
+	
+				trackService.saveAll(scData).then(function(tsData) {
+					log.info('got tracks from soundcloud: ' + tsData.length);
+				});
 			},
 			function(error) {
-				logger.error('got error when getting SC likes: ' + error);
+				log.error('got error when getting SC likes: ' + error);
 			});
 		}
 	}
@@ -72,6 +74,6 @@
 				controller: 'ImportController'
 			});
 		}])
-		.controller('ImportController',['$log', '$scope', '$modalInstance', 'SCService', 'YTService', 'TrackService', 'UserService', ImportController]);
+		.controller('ImportController',['$log', '$scope', '$modalInstance', 'SCService', 'TrackService', 'UserService', ImportController]);
 
 })();

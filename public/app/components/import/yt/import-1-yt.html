@@ -3,6 +3,7 @@
 
 	<div ng-switch="yt.screen">
 
+		<!-- Playlists screen -->
 		<div class="animate-switch" ng-switch-when="playlists">
 
 			<input id="select-all-playlists" type="checkbox"
@@ -18,7 +19,9 @@
 					ng-click="yt.selectPlaylistItem($index)"
 					ng-class="pl.selected ? 'selected' : 'unselected'">
 
-					<input type="checkbox" /> {{pl.title}}
+					<input type="checkbox" /> 
+
+					<span>{{pl.title}}</span>
 
 					<a class="videos-link" ng-click="yt.getVideos($index, $event)" href=""><strong>See Videos</strong></a>
 				</li>
@@ -26,30 +29,28 @@
 			</ul>
 		</div>
 
+		<!-- Videos screen -->
 		<div class="animate-switch" ng-switch-when="videos">
 
-			<p>
-				<a ng-click="yt.goToPlaylists($event)" href=""><strong>< Back to playlists</strong></a>
-			</p>
+			<p><a ng-click="yt.goToPlaylists($event)" href=""><strong>< Back to playlists</strong></a></p>
 
-			<p>
-				<input id="select-all-videos" type="checkbox"
-					ng-model="yt.selectAllVd"
-					ng-change="yt.selectAll()" />
-				<label for="select-all-videos">Select all</label>
-			</p>
+			<input id="select-all-videos" type="checkbox"
+				ng-model="yt.selectAllVd"
+				ng-change="yt.selectAll()" />
+			<label for="select-all-videos">Select all</label>
 
 			<ul class="list-group video-list">
 
 				<li class="list-group-item video-list-heading">
-					<h4 class="list-group-item-heading">Playlist title</h4>
+					<h4 class="list-group-item-heading">Playlist: {{yt.listTitle}}</h4>
 				</li>
+
 				<li class="list-group-item video-list-item"
 					ng-repeat="vid in yt.videos" 
 					ng-click="yt.selectVideoItem($index, $event)"
 					ng-class="{ 'selected' : vid.selected,
-						'disabled success' : vid.ui.importStatus === 'success',
-						'disabled failure' : vid.ui.importStatus === 'failure'}"
+						'disabled success' : vid.getImportStatus() === 'success',
+						'disabled failure' : vid.getImportStatus() === 'failure'}"
 					>
 
 					<input type="checkbox" />
@@ -58,9 +59,9 @@
 							<span class="video-title">{{vid.name}}</span>
 							<!-- <span class="small video-description">{{vid.description}}</span> -->
 
-							<span class="small">{{ vid.ui.importStatus === 'success' ? "This video is already in your library" : "" }}</span>
+							<span class="small">{{ vid.getImportStatus() === 'success' ? "This video is already in your library" : "" }}</span>
 
-							<button  class="btn btn-primary video-import"
+							<button  class="btn btn-primary btn-sm video-import"
 								ng-class="{ 'disabled' : vid.ui.importStatus != 'none' }"
 								ng-click="yt.importOne($index, $event)">
 								Import
@@ -69,12 +70,10 @@
 						</div>
 						<a href="{{vid.getViewInPlaylistUrl()}}"><img src="{{vid.img_url}}" class="video-item-icon" /></a>
 					</div>
-
 				</li>
 
 			</ul>
 		</div>
-
 	</div>
 </div>
 

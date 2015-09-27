@@ -17,8 +17,6 @@
 			RESULTS_LIMIT 	= 200;
 
 		// public methods
-
-
 		SCService.getFavourites = function() {
 			if (!scAuthService.isReady()) {
 				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
@@ -61,13 +59,14 @@
 				if (data.kind == 'track') {
 					var trackData = {
 						src 		: 'sc',
-						srcId		: data.id,
+						srcId		: data.id.toString(), 	// !!! we need this to be a String in TrackFactory.isExists() !!!
 						name 		: data.title,
 						duration	: SC.Helper.millisecondsToHMS(data.duration),
 						genre		: data.genre,
 						uploader	: data.user.username,
 						stream_url 	: data.stream_url,
 						img_url		: data.artwork_url,
+						src_url 	: data.permalink_url,
 						rating		: null,
 						// ui-only attributes
 						displayName: data.user.username + ' ' + data.title 

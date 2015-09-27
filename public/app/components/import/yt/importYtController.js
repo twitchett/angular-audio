@@ -3,6 +3,10 @@
 	'use strict';
 
 	/*
+	* !!!!!!! This controller is not being registerd correctly on app.import.yt module - fix this !!!!!!!!!
+	*
+	* (registering on app.import as workaround)
+	*
 	* Import controller for Youtube content
 	* This currently handles both playlists and videos. Should split into two.
 	*/ 
@@ -43,6 +47,7 @@
 		vm.selectVideoItem = function(index) {
 			var video = vm.videos[index];
 			console.log(index + ' video selected: ', vm.videos[index]);
+			//video.selected = !video.selected; 		---- testing
 			if (video.getImportStatus() === IMPORT_STATUS.NONE) {
 				video.selected = !video.selected;
 			}
@@ -57,10 +62,10 @@
 				})
 			} else {
 				vm.videos.map(function(item) {
-					return angular.extend(item, { selected : vm.selectAllVd } )
-					// if (item.getImportStatus() === IMPORT_STATUS.NONE) {
-					// 	return angular.extend(item, { selected : vm.selectAllVd } );
-					// }
+					//return angular.extend(item, { selected : vm.selectAllVd } ) --- testing
+					if (item.getImportStatus() === IMPORT_STATUS.NONE) {
+						return angular.extend(item, { selected : vm.selectAllVd } );
+					}
 				})
 			}
 		}
@@ -91,11 +96,17 @@
 			} 
 			else if (vm.screen === VIDEOS) {
 				console.log('calling trackservice saveall...')
-				trackService.saveAll(vm.videos.filter(itemFilter)).then(function(response) {
-					log.info('save all success ' , response)
+				var selected = vm.videos.filter(selectedFilter);
+
+				trackService.saveAll(selected).then(function(data) {
+					// replace models with new ones or just set flag?
+					selected.map(function(item) {
+						item.setImportStatus(IMPORT_STATUS.SUCCESS);
+					})
+					$scope.$apply();
 				},
-				function(response) {
-					log.error('save all error ' , response)
+				function(error) {
+					log.error('save all error ' , error)
 				});
 			}
 		}
@@ -119,7 +130,8 @@
 				// check: did we already retreive this playlist?
 				if (playlist.videos) {
 					vm.videos = playlist.videos; // set as 'current' videos
-					vm.screen = VIDEOS;			 // switch to videos screen
+					vm.listTitle = playlist.title;
+					goToVideos();			 	 // switch to videos screen
 
 				// otherwise, we need to make a call to get them
 				} else {
@@ -128,6 +140,7 @@
 
 						playlist.videos = response; // update model with the videos
 						vm.videos = response;		// set as 'current' videos
+						vm.listTitle = playlist.title;
 						goToVideos();				// switch to videos screen
 						$scope.$apply();			// trigger
 					}, 
@@ -148,7 +161,7 @@
 			vm.screen = VIDEOS;
 		}
 
-		function itemFilter(item) {
+		function selectedFilter(item) {
 			return item.selected;
 		}
 	}
@@ -156,6 +169,12 @@
 	// angular config
 	angular
 		.module('app.import')
-		.controller('ImportYTController',['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', ImportYTController]);
+		.config(['$routeProvider', function($routeProvider) {
+			$routeProvider.when('/import/yt', {
+				//templateUrl: 'app/components/library/library.html',
+				controller: 'ImportYTController'
+			});
+		}])
+		.controller('ImportYTController', ['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', ImportYTController]);
 
 })();
