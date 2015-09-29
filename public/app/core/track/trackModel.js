@@ -58,6 +58,18 @@
 			}
 		}
 
+		/*
+		* Bad! set this as an attribute in TrackFactory
+		*/
+		TrackModel.prototype.getSrcIconUrl = function() {
+			if (this.src === 'yt') {
+				return "/assets/images/icons/youtube-player-icon-24px.png";
+			}
+			if (this.src === 'sc') {
+				return "/assets/images/icons/soundcloud-icon-24px.png";
+			}
+		}
+
 		TrackModel.prototype.setImportStatus = function(status) {
 			this.ui.importStatus = status;
 		}
