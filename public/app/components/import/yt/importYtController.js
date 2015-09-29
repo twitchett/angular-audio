@@ -3,10 +3,6 @@
 	'use strict';
 
 	/*
-	* !!!!!!! This controller is not being registerd correctly on app.import.yt module - fix this !!!!!!!!!
-	*
-	* (registering on app.import as workaround)
-	*
 	* Import controller for Youtube content
 	* This currently handles both playlists and videos. Should split into two.
 	*/ 
@@ -35,16 +31,21 @@
 
 		vm.getPlaylists 		= getPlaylists;
 		vm.getVideos 			= getVideos;
+		vm.importOne 			= importOne;
+		vm.importAll 			= importAll;
 		vm.importPlaylist 		= null;
 		vm.importAllPlaylists 	= null;
 		vm.goToPlaylists 		= goToPlaylists;
+		vm.selectPlaylistItem  	= selectPlaylistItem;
+		vm.selectVideoItem 		= selectVideoItem;
+		vm.selectAll 			= selectAll;
 
 		// called on list-item click
-		vm.selectPlaylistItem = function(index) {
+		function selectPlaylistItem(index) {
 			vm.playlists[index].selected = !vm.playlists[index].selected;
 		}
 
-		vm.selectVideoItem = function(index) {
+		function selectVideoItem (index) {
 			var video = vm.videos[index];
 			console.log(index + ' video selected: ', vm.videos[index]);
 			//video.selected = !video.selected; 		---- testing
@@ -54,7 +55,7 @@
 		}
 
 		// called on select-all checkbox change
-		vm.selectAll = function() {
+		function selectAll() {
 			console.log('selectAll with ' + vm.screen);
 			if (vm.screen === PLAYLISTS) {
 				vm.playlists.map(function(item) {
@@ -70,7 +71,7 @@
 			}
 		}
 
-		vm.importOne = function($index, $event) {
+		function importOne($index, $event) {
 			$event.stopPropagation();
 			if (vm.screen === PLAYLISTS) {
 
@@ -90,7 +91,7 @@
 			}
 		}
 
-		vm.import = function() {
+		function importAll() {
 			if (vm.screen === PLAYLISTS) {
 
 			} 

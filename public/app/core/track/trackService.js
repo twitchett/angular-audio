@@ -55,8 +55,15 @@
 			return $http.post(postUrl, postData)
 				.then(function(response) {
 					log.debug('imported ' + response.data.length + ' tracks' );
-					//return trackFactory.convertAll(response.data);
-					return response.data;
+
+					// var trackModels = [];
+					// angular.forEach(response.data, function(trackData, idx) {
+					// 	trackModels.push(new TrackModel(trackData));
+					// })
+
+					// return trackModels;
+
+					return response.data; // just return JSON for now, TrackModels not needed
 				},
 		 		function(response) {
 					log.error('could not import tracks: ' , response);
@@ -71,7 +78,12 @@
 
 			return $http.get(GET_LIB_URL + userId).then(function(response) {
 					log.debug('got libary, tracks: ' + response.data.length);
-					return response.data;
+
+					var trackModels = [];
+					angular.forEach(response.data, function(trackData, idx) {
+						trackModels.push(new TrackModel(trackData));
+					})
+					return trackModels;
 				},
 		 		function(response) {
 					log.error('error getting library for user ' + userId);
