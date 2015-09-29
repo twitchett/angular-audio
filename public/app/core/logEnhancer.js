@@ -36,7 +36,6 @@
 	}
 
 	function LogEnhancerRun($log, logEnhancer) {
-		console.log('LogEnhancerRun');
 		logEnhancer.enhanceAngularLog($log);
 	}
 
