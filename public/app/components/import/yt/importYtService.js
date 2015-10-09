@@ -66,8 +66,8 @@
 				var nextPageToken = response.result.nextPageToken;
 				var items = response.result.items;
 
-				for (var i = 0; i < items.length; i++) {
-					results.push(convertPlaylist(items[i]));
+				angular.forEach(items, function(item)) {
+					results.push(convertPlaylist(item));
 				}
 
 				if (nextPageToken) {
@@ -94,9 +94,9 @@
 				var nextPageToken = response.result.nextPageToken;
 				var items = response.result.items;
 
-				for (var i = 0; i < items.length; i++) {
+				angular.forEach(items, function(item)) {
 
-					var trackModel = convertToTrackModel(items[i]);			
+					var trackModel = convertToTrackModel(item);			
 					if (trackModel) results.push(trackModel);
 				}
 

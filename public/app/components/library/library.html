@@ -1,25 +1,29 @@
 <!-- START: library.html -->
 <div>
 	<h2>Library</h2>
-	<h4>Viewing {{subtracks.length}} of {{lib.tracks.length}}</h4>
+	<h4>Viewing {{lib.subtracks.length}} of {{lib.tracks.length}}</h4>
 
-	controllersubtracks: {{ lib.controllersubtracks }}
+	<br />tracks {{ lib.tracks.length }}
+	 // subtracks: {{ lib.subtracks.length }}
+	 // displayTracks: {{ lib.displayTracks.length }}
 
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<form class="form-inline form-group">
 
-				<input type="text" class="form-control" ng-model="lib.search" placeholder="filter">
+				<input type="text" class="form-control" ng-model="lib.search" ng-change="lib.doTextFilter(lib.search)" placeholder="filter">
 
 				<button type="button" class="btn btn-default" ng-click="lib.openImport()">Import</button>
 
 				<input type="checkbox" class="btn btn-sm"
-					ng-class="{ 'active' : lib.filters.src.yt }"
-					ng-model="lib.filters.src.yt">YouTube</button>
+					ng-class="{ 'active' : lib.typeFilters.src.yt }"
+					ng-change="lib.doTypeFilter()"
+					ng-model="lib.typeFilters.src.yt">YouTube</button>
 
 				<input type="checkbox" class="btn btn-sm"
-					ng-class="{ 'active' : lib.filters.src.yt }"
-					ng-model="lib.filters.src.sc">SoundCloud</button>
+					ng-class="{ 'active' : lib.typeFilters.src.yt }"
+					ng-change="lib.doTypeFilter()"
+					ng-model="lib.typeFilters.src.sc">SoundCloud</button>
 
 				<button type="button" aria-label="condensed view"
 					class="btn btn-default btn-sm  {{ !lib.expanded ? 'active' : '' }}" 
@@ -46,8 +50,9 @@
 			</thead>
 
 			<tbody>
-
-				<tr ng-repeat="track in lib.tracks  | orderBy: lib.order | filter:lib.search | typeFilter:lib.filters as subtracks" 
+				<!-- ng-repeat="track in lib.displayTracks  | orderBy: lib.order | filter:lib.search | typeFilter:lib.filters as subtracks"  -->
+				<tr lazy-load
+					ng-repeat="track in lib.displayTracks  | orderBy: lib.order" 
 					ng-click="lib.selectTrack($index, $event)"
 					ng-class="track.selected ? 'selected' : 'unselected'">
 
