@@ -1,0 +1,47 @@
+<div class="import-window" ng-switch="sc.connected">
+
+	<div class="modal-header">
+		<h3 class="modal-title">Import</h3>
+	</div>
+
+	<div class="modal-body" ng-switch-when="true">
+
+		<input id="select-all" type="checkbox"
+			ng-model="sc.selectAll"
+			ng-change="sc.selectAll()" />
+
+		<label for="select-all">Select all</label>
+
+		<ul class="list-group tracks-list">
+
+			<li class="list-group-item track-item"
+				ng-repeat="t in sc.tracks" 
+				ng-click="sc.selectItem($index)"
+				ng-class="t.selected ? 'selected' : 'unselected'">
+
+				<input type="checkbox" /> 
+
+				<span>{{pl.title}}</span>
+			</li>
+
+		</ul>
+
+	</div>
+
+	<div class="modal-body" ng-switch-when="false">
+		<div ng-switch="sc.connectErr">
+			<span ng-switch-when="false">Sign in to import your SoundCloud shit:</span>
+			<span ng-switch-when="true">Could not authenticate! Try again?</span>
+		</div>
+
+		<button class="btn btn-primary sign-in" ng-click="sc.connect()">Sign in</button>
+	</div>
+
+	<div class="modal-footer">
+		<div ng-switch-when="true">
+			<button class="btn btn-primary" ng-click="sc.import()">Import Selected</button>
+			<button class="btn btn-warning" ng-click="sc.cancel()">Cancel</button>
+		</div>
+	</div>
+
+</div>

@@ -1,0 +1,100 @@
+<div class="import-window" ng-switch="yt.connected">
+
+	<div class="modal-header">
+		<h3 class="modal-title">Import</h3>
+	</div>
+
+	<div class="modal-body" ng-switch-when="true">
+		<div ng-switch="yt.screen">
+
+			<!-- Playlists screen -->
+			<div class="animate-switch" ng-switch-when="playlists">
+
+				<input id="select-all-playlists" type="checkbox"
+					ng-model="yt.selectAllPl"
+					ng-change="yt.selectAll()" />
+
+				<label for="select-all-playlists">Select all</label>
+
+				<ul class="list-group playlist-list">
+
+					<li class="list-group-item playlist-item"
+						ng-repeat="pl in yt.playlists" 
+						ng-click="yt.selectPlaylistItem($index)"
+						ng-class="pl.selected ? 'selected' : 'unselected'">
+
+						<input type="checkbox" /> 
+
+						<span>{{pl.title}}</span>
+
+						<a class="videos-link" ng-click="yt.getVideos($index, $event)" href=""><strong>See Videos</strong></a>
+					</li>
+
+				</ul>
+			</div>
+
+			<!-- Videos screen -->
+			<div class="animate-switch" ng-switch-when="videos">
+
+				<p><a ng-click="yt.goToPlaylists($event)" href=""><strong>< Back to playlists</strong></a></p>
+
+				<input id="select-all-videos" type="checkbox"
+					ng-model="yt.selectAllVd"
+					ng-change="yt.selectAll()" />
+				<label for="select-all-videos">Select all</label>
+
+				<ul class="list-group video-list">
+
+					<li class="list-group-item video-list-heading">
+						<h4 class="list-group-item-heading">Playlist: {{yt.listTitle}}</h4>
+					</li>
+
+					<li class="list-group-item video-list-item"
+						ng-repeat="vid in yt.videos" 
+						ng-click="yt.selectVideoItem($index, $event)"
+						ng-class="{ 'selected' : vid.selected,
+							'disabled success' : vid.getImportStatus() === 'success',
+							'disabled failure' : vid.getImportStatus() === 'failure'}"
+						>
+
+						<input type="checkbox" />
+	 					<div class="video-content-container">
+	 						<div class="video-content">
+								<span class="video-title">{{vid.name}}</span>
+								<!-- <span class="small video-description">{{vid.description}}</span> -->
+
+								<span class="small">{{ vid.getImportStatus() === 'success' ? "This video is already in your library" : "" }}</span>
+
+								<button  class="btn btn-primary btn-sm video-import"
+									ng-class="{ 'disabled' : vid.ui.importStatus != 'none' }"
+									ng-click="yt.importOne($index, $event)">
+									Import
+								</button>
+
+							</div>
+							<a href="{{vid.getViewInPlaylistUrl()}}"><img src="{{vid.img_url}}" class="video-item-icon" /></a>
+						</div>
+					</li>
+
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-body" ng-switch-when="false">
+		<div ng-switch="yt.connectErr">
+			<span ng-switch-when="false">Sign in with Google to import your YouTube shit:</span>
+			<span ng-switch-when="true">Could not authenticate! Try again?</span>
+		</div>
+
+		<button class="btn btn-primary sign-in" ng-click="yt.connect()">Sign in</button>
+	</div>
+
+	<div class="modal-footer">
+		<div ng-switch-when="true">
+			<button class="btn btn-primary" ng-click="yt.import()">Import Selected</button>
+			<button class="btn btn-warning" ng-click="yt.cancel()">Cancel</button>
+		</div>
+	</div>
+
+</div>

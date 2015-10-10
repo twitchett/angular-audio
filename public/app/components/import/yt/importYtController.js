@@ -6,7 +6,7 @@
 	* Import controller for Youtube content
 	* This currently handles both playlists and videos. Should split into two.
 	*/ 
-	function ImportYTController($log, $scope, ytService, trackService, trackFactory) {
+	function ImportYTController($log, $scope, ytService, trackService, trackFactory, ytAuthService) {
 
 		var log			= $log.getInstance('ImportYTController'),
 			vm 			= this,
@@ -21,11 +21,13 @@
 
 		/* Set state-holding variables */
 
-		if (!vm.playlists) getPlaylists(); 
+		if (!vm.playlists && isConnected()) getPlaylists(); 
 		
-		vm.selectAllPl = false;  	// model for "select all" playlists checkbox
-		vm.selectAllVd = false;		// model for "select all" videos
-		vm.screen = PLAYLISTS; 		// model for ng-switch (swaps between playlists/videos)
+		vm.selectAllPl 			= false;  			// model for "select all" playlists checkbox
+		vm.selectAllVd 			= false;			// model for "select all" videos
+		vm.screen 				= PLAYLISTS; 		// model for ng-switch (swaps between playlists/videos)
+		vm.connectErr 			= false;			// model for ng-switch connection error message
+		vm.isConnected 			= isConnected(); 	// model for modal-body ng-switch
 
 		/* Set functions */
 
@@ -39,6 +41,24 @@
 		vm.selectPlaylistItem  	= selectPlaylistItem;
 		vm.selectVideoItem 		= selectVideoItem;
 		vm.selectAll 			= selectAll;
+		vm.isConnected 			= isConnected;
+		vm.connect 				= connect;
+
+		function isConnected() {
+			return ytAuthService.isReady();
+		}
+
+		function connect() {
+			ytAuthService.connect(false).then(function() {
+				vm.connectErr = false;
+				vm.connected = true;
+				getPlaylists();
+			},
+			function(errMsg) {
+				vm.connectErr = true;
+				vm.connected = false;
+			});
+		}
 
 		// called on list-item click
 		function selectPlaylistItem(index) {
@@ -172,10 +192,9 @@
 		.module('app.import.yt')
 		.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/import/yt', {
-				//templateUrl: 'app/components/library/library.html',
 				controller: 'ImportYTController'
 			});
 		}])
-		.controller('ImportYTController', ['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', ImportYTController]);
+		.controller('ImportYTController', ['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', 'YTAuthService', ImportYTController]);
 
 })();

@@ -22,7 +22,7 @@
 		vm.controllersubtracks = $scope.subtracks;
 
 		$scope.$watch('subtracks', function(data) {
-			console.log('watched subtracks ', data);
+			//console.log('watched subtracks ', data);
 		});
 
 		//console.log('LC calling GL whaaat');
@@ -70,11 +70,20 @@
 
 		}
 
-		function openImport() {
+		function openImport(src) {
+			var tplUrl, ctrl;
+			if (src === 'yt') {
+				tplUrl = 'app/components/import/yt/import-yt.html';
+				ctrl = 'ImportYTController as yt';
+			}
+			else if (src === 'sc') {
+				tplUrl = 'app/components/import/sc/import-sc.html';
+				ctrl = 'ImportSCController as sc';
+			}
 			var modalInstance = $modal.open({
 				animation 	: true,
-				templateUrl	: 'app/components/import/import.html',
-				controller 	: 'ImportController as import',
+				templateUrl	: tplUrl,
+				controller 	: ctrl,
 				windowClass : 'modalFit',
 				resolve 	: {
 					items: function () {
