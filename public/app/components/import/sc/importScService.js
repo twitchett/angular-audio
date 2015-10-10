@@ -129,7 +129,7 @@
 	}
 
 	angular
-		.module('app.import.sc', ['app.logEnhancer'])
+		.module('app.import.sc')
 		.factory('SCService', ['$log','$http', '$q', 'SC', 'SCAuthService', 'TrackFactory', SCService]);
 
 })();

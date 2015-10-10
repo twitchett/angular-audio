@@ -11,7 +11,18 @@
 
 				<input type="text" class="form-control" ng-model="lib.search" placeholder="filter">
 
-				<button type="button" class="btn btn-default" ng-click="lib.openImport()">Import</button>
+				<!-- angular-ui directives seem to be buggy, so using class names -->
+				<div class="btn-group dropdown" uib-dropdown is-open="status.isopen">
+					<button id="btn-dropdown-import" type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle>
+						Import <span class="caret"></span>
+					</button>
+					<ul class="uib-dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-dropdown-import">
+						<li role="menuitem"><a href="" ng-click="lib.openImport('yt')">YouTube Wizard</a></li>
+						<li role="menuitem"><a href="" ng-click="lib.openImport('sc')">SoundCloud Wizard</a></li>
+						<li class="divider"></li>
+						<li role="menuitem"><a href="">Get new SC likes</a></li>
+					</ul>
+				</div>
 
 				<input type="checkbox" class="btn btn-sm"
 					ng-class="{ 'active' : lib.filters.src.yt }"
@@ -58,7 +69,7 @@
 						{{ track.src != 'yt' ? track.uploader + ' - ' + track.name : track.name }} 
 					</td>
 					<td class="table-col-rating">
-						<rating ng-model="track.rating" max="5" readonly="false"></rating>
+						<uib-rating ng-model="track.rating" max="5" readonly="false"></uib-rating>
 					</td>
 					<td>
 						<a href="{{ track.getSrcUrl() }}" target="_blank">
