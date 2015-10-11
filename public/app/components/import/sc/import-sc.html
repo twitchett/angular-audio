@@ -12,19 +12,40 @@
 
 		<label for="select-all">Select all</label>
 
-		<ul class="list-group tracks-list">
+			<ul class="list-group import-list">
 
-			<li class="list-group-item track-item"
-				ng-repeat="t in sc.tracks" 
-				ng-click="sc.selectItem($index)"
-				ng-class="t.selected ? 'selected' : 'unselected'">
+				<li class="list-group-item import-list-heading">
+					<h4 class="list-group-item-heading">SoundCloud Favourites</h4>
+				</li>
 
-				<input type="checkbox" /> 
+				<li class="list-group-item import-list-item"
+					ng-repeat="track in sc.tracks" 
+					ng-click="sc.selectItem($index, $event)"
+					ng-class="{ 'selected' : track.selected,
+						'disabled success' : track.getImportStatus() === 'success',
+						'disabled failure' : track.getImportStatus() === 'failure'}"
+					>
 
-				<span>{{pl.title}}</span>
-			</li>
+					<input type="checkbox" />
+ 					<div class="import-content-container">
+ 						<div class="import-content">
+							<span class="import-title">{{track.name}}</span>
+							<span class="small">{{track.uploader}}</span>
+							<!-- <span class="small item-description">{{track.description}}</span> -->
 
-		</ul>
+							<span class="small">{{ track.getImportStatus() === 'success' ? "This track is already in your library" : "" }}</span>
+
+							<button class="btn btn-primary btn-sm btn-import"
+								ng-hide="track.ui.importStatus != 'none'"
+								ng-click="sc.importOne($index, $event)">
+								Import
+							</button>
+
+						</div>
+						<a href=""><img src="{{track.img_url}}" class="import-item-img" /></a>
+					</div>
+				</li>
+			</ul>
 
 	</div>
 

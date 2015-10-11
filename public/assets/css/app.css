@@ -59,11 +59,11 @@
 .import-window input[type=checkbox] {
   margin-right: 7px;
 }
-.import-window .video-list .video-list-item,
+.import-window .import-list .import-list-item,
 .import-window .playlist-list .playlist-item {
   overflow: hidden;
 }
-.import-window .video-list .video-list-item.selected,
+.import-window .import-list .import-list-item.selected,
 .import-window .playlist-list .playlist-item.selected {
   background-color: #F2F1F5;
 }
@@ -74,32 +74,32 @@
 .import-window .playlist-list .playlist-item:hover .videos-link {
   display: inline;
 }
-.import-window .video-list .video-list-item {
+.import-window .import-list .import-list-item {
   height: 120px;
 }
-.import-window .video-list .video-list-item .video-item-icon {
+.import-window .import-list .import-list-item .import-item-icon {
   position: absolute;
   right: 10;
 }
-.import-window .video-list .video-list-item .video-content {
+.import-window .import-list .import-list-item .import-content {
   width: 370px;
 }
-.import-window .video-list .video-list-item .video-content,
-.import-window .video-list .video-list-item .video-content-continer,
-.import-window .video-list .video-list-item input[type=checkbox] {
+.import-window .import-list .import-list-item .import-content,
+.import-window .import-list .import-list-item .import-content-continer,
+.import-window .import-list .import-list-item input[type=checkbox] {
   float: left;
 }
-.import-window .video-list .video-list-item .video-title {
+.import-window .import-list .import-list-item .import-title {
   margin-bottom: 5px;
 }
-.import-window .video-list .video-list-item .video-title,
-.import-window .video-list .video-list-item .video-description {
+.import-window .import-list .import-list-item .import-title,
+.import-window .import-list .import-list-item .import-description {
   display: block;
 }
-.import-window .video-list .video-list-item.disabled {
+.import-window .import-list .import-list-item.disabled {
   color: #B3B3B3;
 }
-.import-window .video-list .btn.video-import {
+.import-window .import-list .btn-import {
   margin-top: 5px;
   position: absolute;
   bottom: 18;

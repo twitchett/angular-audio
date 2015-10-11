@@ -43,13 +43,13 @@
 					ng-change="yt.selectAll()" />
 				<label for="select-all-videos">Select all</label>
 
-				<ul class="list-group video-list">
+				<ul class="list-group import-list">
 
-					<li class="list-group-item video-list-heading">
+					<li class="list-group-item import-list-heading">
 						<h4 class="list-group-item-heading">Playlist: {{yt.listTitle}}</h4>
 					</li>
 
-					<li class="list-group-item video-list-item"
+					<li class="list-group-item import-list-item"
 						ng-repeat="vid in yt.videos" 
 						ng-click="yt.selectVideoItem($index, $event)"
 						ng-class="{ 'selected' : vid.selected,
@@ -58,24 +58,23 @@
 						>
 
 						<input type="checkbox" />
-	 					<div class="video-content-container">
-	 						<div class="video-content">
-								<span class="video-title">{{vid.name}}</span>
-								<!-- <span class="small video-description">{{vid.description}}</span> -->
+	 					<div class="import-content-container">
+	 						<div class="import-content">
+								<span class="import-title">{{vid.name}}</span>
+								<!-- <span class="small item-description">{{vid.description}}</span> -->
 
 								<span class="small">{{ vid.getImportStatus() === 'success' ? "This video is already in your library" : "" }}</span>
 
-								<button  class="btn btn-primary btn-sm video-import"
-									ng-class="{ 'disabled' : vid.ui.importStatus != 'none' }"
+								<button  class="btn btn-primary btn-sm btn-import"
+									ng-hide="track.ui.importStatus != 'none'"
 									ng-click="yt.importOne($index, $event)">
 									Import
 								</button>
 
 							</div>
-							<a href="{{vid.getViewInPlaylistUrl()}}"><img src="{{vid.img_url}}" class="video-item-icon" /></a>
+							<a href="{{vid.getViewInPlaylistUrl()}}"><img src="{{vid.img_url}}" class="import-item-img" /></a>
 						</div>
 					</li>
-
 				</ul>
 			</div>
 		</div>
