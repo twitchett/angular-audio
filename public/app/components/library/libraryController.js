@@ -5,7 +5,7 @@
 	/*
 	* Library Controller
 	*/
-	function LibraryController($log, $scope, $modal, libraryService, trackService) {
+	function LibraryController($log, $scope, $modal, libraryService, trackService, scService) {
 		console.log('in LibraryController')
 
 		var log	= $log.getInstance('LibraryController'),
@@ -42,6 +42,7 @@
 		vm.expand 		= expand;
 		vm.editTrack 	= null;
 		vm.deleteTrack 	= deleteTrack;
+		vm.getSCNewLikes = getSCNewLikes;
 
 		function getLibrary() {
 			libraryService.getLibrary().then(function(data) {
@@ -85,6 +86,7 @@
 				templateUrl	: tplUrl,
 				controller 	: ctrl,
 				windowClass : 'modalFit',
+				size 		: 'lg',
 				resolve 	: {
 					items: function () {
 						//
@@ -106,6 +108,36 @@
 			});
 		};
 
+		function getSCNewLikes() {
+			console.log('getNewSCLikes');
+			scService.getNewFavourites().then(function(tracks) {
+				var modalInstance = $modal.open({
+					animation 	: true,
+					templateUrl	: 'app/components/import/sc/import-sc.html',
+					controller 	: 'ImportSCController as sc',
+					windowClass : 'modalFit',
+					size	 	: 'lg',
+					resolve 	: {
+						items: function () {
+							console.log('resolving items', tracks);
+							return tracks; 
+						}
+					}
+				});
+
+				modalInstance.result.then(function (data) {
+					$log.info('Modal dismissed at: ' + new Date());
+					libraryService.getLibrary(true).then(function(tracks) {
+						vm.tracks = tracks;
+					});
+				});
+			},
+			function(err) {
+				console.err(err)
+			})
+		}
+
+		// ???????????
 		function expand(expand) {
 			vm.expanded = expand;
 			console.log('expanded: ' + vm.expanded)
@@ -136,6 +168,6 @@
 				controller: 'LibraryController as lib'
 			});
 		}])
-		.controller('LibraryController', ['$log', '$scope', '$modal', 'LibraryService', 'TrackService', LibraryController])
+		.controller('LibraryController', ['$log', '$scope', '$modal', 'LibraryService', 'TrackService', 'SCService', LibraryController])
 		.filter('typeFilter', TypeFilter);
 })();

@@ -18,40 +18,21 @@
 
 		// public methods
 		SCService.getFavourites = function() {
-			if (!scAuthService.isReady()) {
-				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
-				return $q.reject('user not authenticated');
-			} 
-
-			var d = $q.defer();
-			
-			var options = { 
-				oauth_token	: scAuthService.getToken(),
-				limit		: RESULTS_LIMIT
+			var selectionFn = function(model) {
+				return (model) ? true : false;
 			}
-			log.debug('making request to ' + SC_FAVS_URL + ' with options ', options);
-			
-			// TODO: pagination
-			SC.get(SC_FAVS_URL, options, function(data, error) {
-				if (error) {
-					d.reject('error making request to ' + SC_FAVS_URL + ': ' + error);
-					return d.promise;
-				}
-
-				var tracks = [];
-				for (var i = 0; i < data.length; i++) {
-					var model = convertToModel(data[i]);
-					if (model) tracks.push(model);
-				}
-
-				log.debug('getFavourites() got ' + tracks.length + ' items');
-				d.resolve(tracks);
-			});
-
-			return d.promise;
+			return makeGetFavoritesRequest(selectionFn);
 		}
 
 		SCService.getNewFavourites = function() {
+			var selectionFn = function(model) {
+				return (model && model.getImportStatus() === 'none') ? true : false;
+			}
+			return makeGetFavoritesRequest(selectionFn);
+		}
+
+		// private methods
+		function makeGetFavoritesRequest(selectionFn) {
 			if (!scAuthService.isReady()) {
 				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
 				return $q.reject('user not authenticated');
@@ -69,33 +50,20 @@
 			SC.get(SC_FAVS_URL, options, function(data, error) {
 				if (error) {
 					d.reject('error making request to ' + SC_FAVS_URL + ': ' + error);
-					return d.promise;
-				}
-
-				angular.forEach(data, function(item, idx) {
-					var model = convertToModel(data[i]);
-					if (model) {
-						if (model.getImportStatus() === 'none') {
-							return;
-						}
-						tracks.push(model);
+				} else {
+					var tracks = [];
+					for (var i = 0; i < data.length; i++) {
+						var model = convertToModel(data[i]);
+						if (selectionFn(model)) tracks.push(model);
 					}
-				});
-	
 
-				var tracks = [];
-				for (var i = 0; i < data.length; i++) {
-
+					log.debug('getFavourites() got ' + tracks.length + ' items');
+					d.resolve(tracks);
 				}
-
-				log.debug('getFavourites() got ' + tracks.length + ' items');
-				d.resolve(tracks);
 			});
 
 			return d.promise;
 		}
-
-		// private methods
 
 		// converts JSON response from soundcloud to TrackModel object
 		function convertToModel(data) {
