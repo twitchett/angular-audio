@@ -4,14 +4,14 @@
 
 	/*
 	* Encapsulates all external interactions with YouTube.
-	* Responsibility: to make requests to youtube and return TrackModels or playlist data
+	* Responsibility: to make requests to youtube and return valid TrackModels or playlist data
 	*/
 	function YTService($log, $http, $q, ytAuthService, trackFactory, PROPERTIES) {
 		
 		var YTService 	= {},
 			log 		= $log.getInstance('YTService');
 
-		var pageSize 	= 50; 	// number of results to return in API requests (default is 5, max is 50)
+		var pageSize 	= 10; 	// number of results to return in API requests (default is 5, max is 50)
 
 		var VIDEO_URL 	= "https://www.youtube.com/watch?v=",
 			LIST_PARAM	= "&list="
@@ -26,12 +26,10 @@
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
 				maxResults  : pageSize		
 			}
-
-			// the executable request
-			var request = gapi.client.youtube.playlists.list(options);
+			var requestFn = gapi.client.youtube.playlists.list;
 			
 			// returns a promise
-			return getAllPlaylists(request, options, playlists);
+			return fetchResults(requestFn, options, playlists, convertPlaylist);
 		}
 
 		/* 
@@ -44,77 +42,40 @@
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
 				maxResults 	: pageSize
 			}
-
-			// the executable request
-			var request = gapi.client.youtube.playlistItems.list(options);
-
-			console.log(request);
+			var requestFn = gapi.client.youtube.playlistItems.list;
 			
 			// returns a promise
-			return getPlaylistItems(request, options, videos);
+			return fetchResults(requestFn, options, videos, convertTrack);
 		}
 
 		/*
-		* This method recursively calls the API until all playlists have been retrieved.
-		* The calls have to be in sequence because each response contains a code to retrieve the next page. No parallization here...
+		* This method recursively calls requestFn until all data has been retrieved.
+		* Each response contains a code (nextPageToken) to retrieve the next page.
 		*/
-		var getAllPlaylists = function(request, options, results, count, limit) {
+		var fetchResults = function(requestFn, options, results, conversionFn, count, limit) {
 			log.debug('makign request, num results=' + results.length + ' options ', options);
+
+			var fetchNextPage = function(response) {
+				var nextPageToken = response.result.nextPageToken;
+				var items = response.result.items;
+
+				angular.forEach(items, function(item) {
+					results.push(conversionFn(item));
+				});
+
+				if (nextPageToken) {
+					options.pageToken = nextPageToken;
+
+					return fetchResults(requestFn, options, results, conversionFn);
+
+				} else {
+					log.debug('retrieved ' + results.length + ' items');
+					return results;
+				}
+			}
 	
-			return request.then(function(response) {
-
-				var nextPageToken = response.result.nextPageToken;
-				var items = response.result.items;
-
-				for (var i = 0; i < items.length; i++) {
-					results.push(convertPlaylist(items[i]));
-				}
-
-				if (nextPageToken) {
-					options.pageToken = nextPageToken;
-					var newRequest 	= gapi.client.youtube.playlists.list(options);
-
-					return getAllPlaylists(newRequest, options, results);
-
-				} else {
-					log.debug('retrieved ' + results.length + ' playlists');
-					return results;
-				}
-			},
-			errorHandler);
+			return requestFn(options).then(fetchNextPage, errorHandler);
 		}
-
-		/*
-		* Recursively gets all videos.
-		*/
-		var getPlaylistItems = function(request, options, results, count, limit) {	
-			log.debug('getPlaylistItems() request, num results=' + results.length + ' options ', options);
-			return request.then(function(response) {
-
-				var nextPageToken = response.result.nextPageToken;
-				var items = response.result.items;
-
-				for (var i = 0; i < items.length; i++) {
-
-					var trackModel = convertToTrackModel(items[i]);			
-					if (trackModel) results.push(trackModel);
-				}
-
-				if (nextPageToken) {
-					options.pageToken = nextPageToken;
-					var newRequest 	= gapi.client.youtube.playlistItems.list(options);
-
-					return getPlaylistItems(newRequest, options, results);
-
-				} else {
-					console.log('returning with ' + results.length);
-					return results;
-				}
-			},
-			errorHandler);
-		}
-
-		// private methods
 
 		// Convert JSON playlist response to playlist object
 		var convertPlaylist = function(data) {
@@ -127,7 +88,7 @@
 		}
 
 		// converts JSON response from YouTube to TrackModel object
-		var	convertToTrackModel = function(data) {
+		var	convertTrack = function(data) {
 			console.log('converting video ' , data);
 
 			if (!isUnavailable(data)) {
@@ -144,6 +105,8 @@
 					}
 
 					var trackModel = trackFactory.createNew(trackData);
+
+					console.log('new trackmodel', trackModel);
 
 					// add import-only attributes
 					return augmentProperties(trackModel, data);
@@ -187,7 +150,7 @@
 			log.error('error making API call! ', response);
 
 			if (response.status == 403) {
-				// we probably need to doAuth();
+				// TODO auth prompt
 			}
 		}
 
