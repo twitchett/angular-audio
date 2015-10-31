@@ -3,12 +3,14 @@
 	'use strict';
 
 	/*
-	* Encapsulates all external interactions with YouTube.
+	* Responsible for OAuth2 authentication with YouTube.
 	*/
-	function YTAuthService($log, $http, $q, PROPERTIES) {
+	function YTAuthService($log, $http, $q, CONFIG) {
 		// setup
 		var YTAuthService 	= {},
 			log 			= $log.getInstance('YTAuthService');
+
+		// public methods
 
 		YTAuthService.connect = function(immediate) {
 			return doAuth(immediate);
@@ -24,39 +26,35 @@
 
 		// private methods
 
-		// use immediate=true when checking first. if not authorized,
-		// use immediate=false to trigger popup dialog
+		// use immediate=true to check if user already authorized (no popup prompt)
+		// if not authorized, use immediate=false to trigger popup dialog
 		var doAuth = function(immediate) {
-
 			var q = $q.defer();
 
-			// get settings from config 
-			$http.get(PROPERTIES.CONFIGS).then(function(response) {
-				var opts = 	{
-					client_id 	: response.data.gapi.client_id,
-					scope 		: response.data.gapi.scopes,
-					immediate	: immediate
-				}
+			var opts = 	{
+				client_id 	: CONFIG.gapi.client_id,
+				scope 		: CONFIG.gapi.scopes,
+				immediate	: immediate
+			}
 
-				//console.warn('NOT AUTHORIZING GAPI');
-				log.debug('authorizing with opts ', opts);
+			//console.warn('NOT AUTHORIZING GAPI');
+			log.debug('authorizing with opts ', opts);
 
-				gapi.auth.authorize(opts, function(response) {
-					console.log('in callback function, response is ', response)
-					if (response && !response.error) {
-						log.info('resolving promise')
-						q.resolve(response);
-					} else {
-						log.warn('rejecting proise')
-						q.reject(response);
-					}	
-				}); 
-			});
+			gapi.auth.authorize(opts, function(response) {
+				console.log('in callback function, response is ', response)
+				if (response && !response.error) {
+					log.info('resolving promise')
+					q.resolve(response);
+				} else {
+					log.warn('rejecting proise', promise)
+					q.reject(response);
+				}	
+			}); 
 
 			return q.promise;
 		}
  
-		// upon successful authorization, response will contain access token. "gapi" handles this for us.
+		// upon successful authorization, response will contain access token. "gapi" saves this for us.
 		var handleAuthResponse = function(response) {
 			console.log('handling result', response);
 			if (response && !response.error) {
@@ -71,7 +69,7 @@
 
 	}
 
-	function YTAuthRun($window, $log, ytAuthService, PROPERTIES) {		
+	function YTAuthRun($window, $log, ytAuthService) {		
 		var log = $log.getInstance('YTAuthRun');
 
 		// this function needs to be available on the page when the google api script loads
@@ -94,9 +92,12 @@
 		head.appendChild(script);
 	}
 
+	/*
+	* angular module configuration
+	*/
 	angular
 	 	.module('app.import.yt')
-	 	.run(['$window', '$log', 'YTAuthService', 'PROPERTIES', YTAuthRun])
-		.factory('YTAuthService', ['$log','$http', '$q', 'PROPERTIES', YTAuthService]);
+	 	.run(['$window', '$log', 'YTAuthService', YTAuthRun])
+		.factory('YTAuthService', ['$log','$http', '$q', 'CONFIG', YTAuthService]);
 
 })();

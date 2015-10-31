@@ -4,15 +4,19 @@
 
 	/*
 	* Factory for the creation of TrackModels.
-	* Responsible for providing other services with TrackModels. 
 	*/
-	function TrackFactory($log, libraryService, TrackModel) {
+	function TrackFactory($log, libraryService, TrackModel, CONST) {
 
 		var TrackFactory = {};
 		var log = $log.getInstance('TrackFactory');
 
 		TrackFactory.createNewForLibrary
 
+		/*
+		* Takes an array of json objects and converts to an array of TrackModels.
+		* Does not check for duplicates - importStatus not set.
+		* Not currently used...?
+		*/
 		TrackFactory.convertAll = function(data) {
 			var trackModels = [];
 			angular.forEach(data, function(item, idx) {
@@ -21,14 +25,17 @@
 			return trackModels;
 		}
 
-		// Creates a TrackModel object from the given json
+		/*
+		* Creates a TrackModel object from the given json.
+		* Checks if the track already exists in the library and sets importStatus = SUCCESS if so.
+		* Called by import services.
+		*/
 		TrackFactory.createNew = function(data) {
 			var track = new TrackModel(data);
 
 			// check if it already exists
 			if (trackExists(track)) {
-				//track.ui.importStatus = 'success';
-				track.setImportStatus('success');
+				track.setImportStatus(CONST.TRACK.IMPORT.SUCCESS);
 			}
 
 			return track;
@@ -58,6 +65,6 @@
 
 	angular
 		.module('app.track')
-		.factory('TrackFactory', ['$log', 'LibraryService', 'TrackModel', TrackFactory]);
+		.factory('TrackFactory', ['$log', 'LibraryService', 'TrackModel', 'CONST', TrackFactory]);
 
 })();

@@ -5,16 +5,10 @@
 	/*
 	* Import controller for SoundCloud content
 	*/ 
-	function ImportSCController($log, $scope, scService, scAuthService, trackService, trackFactory) {
+	function ImportSCController($log, $scope, scService, scAuthService, trackService, trackFactory, CONST) {
 
 		var log			= $log.getInstance('ImportSCController'),
 			vm 			= this;
-
-		var IMPORT_STATUS = {
-			SUCCESS : 'success',
-			FALIURE : 'failure',
-			NONE 	: 'none' 
-		}
 
 		/* Set state-holding variables */
 
@@ -54,7 +48,7 @@
 			var track = vm.tracks[index];
 			console.log(index + ' video selected: ', vm.tracks[index]);
 			//video.selected = !video.selected; 		---- testing
-			if (track.getImportStatus() === IMPORT_STATUS.NONE) {
+			if (track.getImportStatus() === CONST.TRACK.IMPORT.NONE) {
 				track.selected = !track.selected;
 			}
 		}
@@ -63,7 +57,7 @@
 		function selectAll() {
 			vm.tracks.map(function(item) {
 				//return angular.extend(item, { selected : vm.selectAllVd } ) --- testing
-				if (item.getImportStatus() === IMPORT_STATUS.NONE) {
+				if (item.getImportStatus() === CONST.TRACK.IMPORT.NONE) {
 					return angular.extend(item, { selected : vm.selectAllVd } );
 				}
 			})
@@ -84,11 +78,11 @@
 			if (track) {
 				trackService.save(track).then(function(response) {
 					log.info('import one success ' , response)
-					track.setImportStatus(IMPORT_STATUS.SUCCESS);
+					track.setImportStatus(CONST.TRACK.IMPORT.SUCCESS);
 				},
 				function(response) {
 					log.error('import one error ' , response)
-					track.setImportStatus(IMPORT_STATUS.FAILURE);
+					track.setImportStatus(CONST.TRACK.IMPORT.FAILURE);
 				});
 			}
 		}
@@ -98,9 +92,10 @@
 			var selected = vm.tracks.filter(selectedFilter);
 
 			trackService.saveAll(selected).then(function(data) {
-				// replace models with new ones or just set flag?
+				// is it enough to set import status on existing models,
+				// or should all of them be replaced? currently replacing then setting flag
 				selected.map(function(item) {
-					item.setImportStatus(IMPORT_STATUS.SUCCESS);
+					item.setImportStatus(CONST.TRACK.IMPORT.SUCCESS);
 				})
 				$scope.$apply();
 			},
@@ -114,7 +109,9 @@
 		}
 	}
 
-	// angular config
+	/*
+	* angular module configuration
+	*/
 	angular
 		.module('app.import.sc')
 		.config(['$routeProvider', function($routeProvider) {
@@ -122,6 +119,6 @@
 				controller: 'ImportSCController'
 			});
 		}])
-		.controller('ImportSCController', ['$log', '$scope', 'SCService', 'SCAuthService', 'TrackService', 'TrackFactory', ImportSCController]);
+		.controller('ImportSCController', ['$log', '$scope', 'SCService', 'SCAuthService', 'TrackService', 'TrackFactory', 'CONST', ImportSCController]);
 
 })();

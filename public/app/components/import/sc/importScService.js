@@ -5,7 +5,7 @@
 	/*
 	* Encapsulates all external interactions with SoundCloud.
 	*/
-	function SCService($log, $http, $q, SC, scAuthService, trackFactory) {
+	function SCService($log, $http, $q, SC, scAuthService, trackFactory, CONST) {
 		// setup
 		var SCService 	= {},
 			log 		= $log.getInstance('SCService'),
@@ -70,7 +70,7 @@
 			try {
 				if (data.kind == 'track') {
 					var trackData = {
-						src 		: 'sc',
+						src 		: CONST.ORIGIN.SC,
 						srcId		: data.id.toString(), 	// !!! we need this to be a String in TrackFactory.isExists() !!!
 						name 		: data.title,
 						duration	: SC.Helper.millisecondsToHMS(data.duration),
@@ -98,6 +98,6 @@
 
 	angular
 		.module('app.import.sc')
-		.factory('SCService', ['$log','$http', '$q', 'SC', 'SCAuthService', 'TrackFactory', SCService]);
+		.factory('SCService', ['$log','$http', '$q', 'SC', 'SCAuthService', 'TrackFactory', 'CONST', SCService]);
 
 })();

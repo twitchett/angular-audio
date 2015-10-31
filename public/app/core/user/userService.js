@@ -5,14 +5,16 @@
 	/*
 	* Dummy implementation of a UserService
 	*/
-	function UserService($log, $http, UserModel, ytAuthService, scAuthService) {
+	function UserService($log, $http, UserModel, ytAuthService, scAuthService, CONST) {
 
 		var UserService = {};
 		var log = $log.getInstance('UserService');
 
 		var thisUser = new UserModel('54302d72625533f01be231cb');
+
+		var yt = CONST.ORIGIN.YT,
+			sc = CONST.ORIGIN.SC
 		
-		// make these global constants
 		var services = {
 			yt : ytAuthService,
 			sc : scAuthService
@@ -34,7 +36,7 @@
 			var service = services[serviceCode];
 
 			if (service) {
-				if (serviceCode === 'yt')
+				if (serviceCode === ORIGIN.YT)
 					return service.connect(false);
 				else
 					return service.connect();
@@ -42,8 +44,6 @@
 				log.warn('connect(): could not find service for serviceCode ' + serviceCode);
 				return null;
 			}
-
-
 		}
 
 		UserService.isAuthorized = function(serviceCode) {
@@ -58,5 +58,5 @@
 
 	angular
 		.module('app.user')
-		.factory('UserService', ['$log', '$http', 'UserModel', 'YTAuthService', 'SCAuthService', UserService]);
+		.factory('UserService', ['$log', '$http', 'UserModel', 'YTAuthService', 'SCAuthService', 'CONST', UserService]);
 })();

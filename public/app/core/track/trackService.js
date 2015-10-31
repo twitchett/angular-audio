@@ -7,7 +7,6 @@
 	* Methods accept & return TrackModel objects.
 	*/
 	function TrackService($log, $http, $q, userService, TrackModel) {
-		console.log('in TrackService')
 
 		var TrackService = {};
 		var log = $log.getInstance('TrackService');

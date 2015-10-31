@@ -6,18 +6,12 @@
 	* Import controller for Youtube content
 	* This currently handles both playlists and videos. Should split into two.
 	*/ 
-	function ImportYTController($log, $scope, ytService, trackService, trackFactory, ytAuthService) {
+	function ImportYTController($log, $scope, ytService, trackService, trackFactory, ytAuthService, CONST) {
 
 		var log			= $log.getInstance('ImportYTController'),
 			vm 			= this,
 			PLAYLISTS 	= "playlists",
 			VIDEOS 		= "videos";
-
-		var IMPORT_STATUS = {
-			SUCCESS : 'success',
-			FALIURE : 'failure',
-			NONE 	: 'none' 
-		}
 
 		/* Set state-holding variables */
 
@@ -69,7 +63,7 @@
 			var video = vm.videos[index];
 			console.log(index + ' video selected: ', vm.videos[index]);
 			//video.selected = !video.selected; 		---- testing
-			if (video.getImportStatus() === IMPORT_STATUS.NONE) {
+			if (video.getImportStatus() === CONST.TRACK.IMPORT.NONE) {
 				video.selected = !video.selected;
 			}
 		}
@@ -84,7 +78,7 @@
 			} else {
 				vm.videos.map(function(item) {
 					//return angular.extend(item, { selected : vm.selectAllVd } ) --- testing
-					if (item.getImportStatus() === IMPORT_STATUS.NONE) {
+					if (item.getImportStatus() === CONST.TRACK.IMPORT.NONE) {
 						return angular.extend(item, { selected : vm.selectAllVd } );
 					}
 				})
@@ -101,11 +95,11 @@
 				if (video) {
 					trackService.save(video).then(function(response) {
 						log.info('import one success ' , response)
-						video.setImportStatus(IMPORT_STATUS.SUCCESS);
+						video.setImportStatus(CONST.TRACK.IMPORT.SUCCESS);
 					},
 					function(response) {
 						log.error('import one error ' , response)
-						video.setImportStatus(IMPORT_STATUS.FAILURE);
+						video.setImportStatus(CONST.TRACK.IMPORT.FAILURE);
 					});
 				}
 			}
@@ -122,7 +116,7 @@
 				trackService.saveAll(selected).then(function(data) {
 					// replace models with new ones or just set flag?
 					selected.map(function(item) {
-						item.setImportStatus(IMPORT_STATUS.SUCCESS);
+						item.setImportStatus(CONST.TRACK.IMPORT.SUCCESS);
 					})
 					$scope.$apply();
 				},
@@ -195,6 +189,6 @@
 				controller: 'ImportYTController'
 			});
 		}])
-		.controller('ImportYTController', ['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', 'YTAuthService', ImportYTController]);
+		.controller('ImportYTController', ['$log', '$scope', 'YTService', 'TrackService', 'TrackFactory', 'YTAuthService', 'CONST', ImportYTController]);
 
 })();

@@ -7,7 +7,7 @@
 	*
 	* See: https://medium.com/opinionated-angularjs/angular-model-objects-with-javascript-classes-2e6a067c73bc
 	*/
-	function TrackModel() {
+	function TrackModel(CONST) {
 
 		var TrackModel = function(attrs) {
 
@@ -50,10 +50,10 @@
 		}
 
 		TrackModel.prototype.getSrcUrl = function() {
-			if (this.src === 'yt') {
+			if (this.src === CONST.ORIGIN.YT) {
 				return "https://www.youtube.com/watch?v=" + this.srcId;
 			}
-			if (this.src === 'sc') {
+			if (this.src === CONST.ORIGIN.SC) {
 				return this.src_url;
 			}
 		}
@@ -62,10 +62,10 @@
 		* Bad! set this as an attribute in TrackFactory
 		*/
 		TrackModel.prototype.getSrcIconUrl = function() {
-			if (this.src === 'yt') {
+			if (this.src === CONST.ORIGIN.YT) {
 				return "/assets/images/icons/youtube-player-icon-24px.png";
 			}
-			if (this.src === 'sc') {
+			if (this.src === CONST.ORIGIN.SC) {
 				return "/assets/images/icons/soundcloud-icon-24px.png";
 			}
 		}
@@ -84,6 +84,6 @@
 
 	angular
 		.module('app.track')
-		.factory('TrackModel', [TrackModel]);
+		.factory('TrackModel', ['CONST', TrackModel]);
 
 })();

@@ -6,7 +6,7 @@
 	* Encapsulates all external interactions with YouTube.
 	* Responsibility: to make requests to youtube and return valid TrackModels or playlist data
 	*/
-	function YTService($log, $http, $q, ytAuthService, trackFactory, PROPERTIES) {
+	function YTService($log, $http, $q, ytAuthService, trackFactory, CONST) {
 		
 		var YTService 	= {},
 			log 		= $log.getInstance('YTService');
@@ -94,7 +94,7 @@
 			if (!isUnavailable(data)) {
 				try {
 					var trackData = {
-						src 		: 'yt',
+						src 		: CONST.ORIGIN.YT,
 						srcId 		: data.snippet.resourceId.videoId,
 						name 		: data.snippet.title,
 						description : data.snippet.description,
@@ -160,6 +160,6 @@
 
 	angular
 	 	.module('app.import.yt')
-		.factory('YTService', ['$log','$http', '$q', 'YTAuthService', 'TrackFactory', 'PROPERTIES', YTService]);
+		.factory('YTService', ['$log','$http', '$q', 'YTAuthService', 'TrackFactory', 'CONST', YTService]);
 
 })();
