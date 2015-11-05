@@ -15,25 +15,24 @@
 
 		var OA_TOKEN_URL 	= '/sc/getOAToken';
 
-		// public methods
-
 		SCAuthService.connect = function() {
-			var q1 = $q.defer();
+			var d = $q.defer();
 
-			SC.connect(function(data) {
-
+			function connectCallback(data) {
 				$http.get(OA_TOKEN_URL).then(function(response) {
 					log.debug('got OAuth token for user ');
 					token = response.data;
-					q1.resolve();
+					d.resolve();
 				},
 				function(error) {
-					q1.reject('could not get OAuth token');
+					d.reject('could not get OAuth token');
 				});
 
-			});
+			}
 
-			return q1.promise;
+			SC.connect(connectCallback);
+			
+			return d.promise;
 		};
 
 		SCAuthService.isReady = function() {
@@ -48,22 +47,18 @@
 			token = null; 
 		}
 
-		// private methods
-
 		return SCAuthService;
 	}
 
-	function SCAuthRun($log, $http, SC, PROPERTIES) {
-		if (SC) {
-			// client id & redirect uri held in properties file (temporary implementation)
-			$http.get(PROPERTIES.CONFIGS).then(function(response) {
-				var sc_client_id = response.data.sc.client_id;
-				var sc_redirect_uri = response.data.sc.redirect_uri;
-				SC.initialize({
-					client_id		: sc_client_id,
-				 	redirect_uri	: sc_redirect_uri
-				});
-			})
+	function SCAuthRun($log, SC, CONFIG) {
+
+		// SC is the SoundCloud javascript client helper
+		// see https://developers.soundcloud.com/docs/api/sdks#javascript
+		if (SC) { 
+			SC.initialize({
+				client_id		: CONFIG.sc.client_id,
+			 	redirect_uri	: CONFIG.sc.redirect_uri
+			});
 		} else {
 			$log.error('SC object not found on page. Cannot connect to SoundCloud.');
 		}
@@ -71,7 +66,7 @@
 
 	angular
 		.module('app.import.sc')
-		.run(['$log', '$http', 'SC', 'PROPERTIES', SCAuthRun])
+		.run(['$log', 'SC', 'CONFIG', SCAuthRun])
 		.factory('SCAuthService', ['$log','$http', '$q', 'SC', SCAuthService]);
 
 })();

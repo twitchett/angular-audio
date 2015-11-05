@@ -26,6 +26,7 @@
 				part 		: 'snippet', 	// return "snippet" data (title, desc, etc)
 				maxResults  : pageSize		
 			}
+
 			var requestFn = gapi.client.youtube.playlists.list;
 			
 			// returns a promise
@@ -55,6 +56,7 @@
 		var fetchResults = function(requestFn, options, results, conversionFn, count, limit) {
 			log.debug('makign request, num results=' + results.length + ' options ', options);
 
+			// this is the success handler to requestFn (which makes the external call)
 			var fetchNextPage = function(response) {
 				var nextPageToken = response.result.nextPageToken;
 				var items = response.result.items;
@@ -63,11 +65,13 @@
 					results.push(conversionFn(item));
 				});
 
+				// if nextPageToken exists, make another call
 				if (nextPageToken) {
 					options.pageToken = nextPageToken;
 
 					return fetchResults(requestFn, options, results, conversionFn);
 
+				// if there is no nextPageToken, we have all the results: return the array
 				} else {
 					log.debug('retrieved ' + results.length + ' items');
 					return results;
@@ -109,7 +113,7 @@
 					console.log('new trackmodel', trackModel);
 
 					// add import-only attributes
-					return augmentProperties(trackModel, data);
+					return setImportAttributes(trackModel, data);
 
 				} catch (error) {
 					log.error('convert to model error ', error);
@@ -120,7 +124,7 @@
 			}
 		}
 
-		var augmentProperties = function(trackModel, data) {
+		var setImportAttributes = function(trackModel, data) {
 
 			// add a function that returns a link to this video in its playlist
 			trackModel.getViewInPlaylistUrl = function() {
