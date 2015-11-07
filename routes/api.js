@@ -8,18 +8,32 @@ var express = require('express'),
 
 var	logger = log4js.getLogger();
 
+/* ---------------------------------------------------------/
+*
+* REST API: provides CRUD functionality for Track objects
+* Routes are mounted on path '/api'
+* See also: trackService.js in front end
+*
+* Currently working endpoints:
+* 	GET /api/library/:id
+*	GET /api/track/:id
+*	POST /api/tracks
+*	POST /api/track
+*
+* --------------------------------------------------------- */
+
 
 /*
-* REST API: provides CRUD functionality for Track objects
-*/
-
-// HTTP GET: gets the library of user with 'id'
-router.get('/api/library/:id', function(req, res) {
+* HTTP GET: gets the library of user with 'id'
+*
+* TODO 1) rename this route to /tracks!
+*/ 
+router.get('/library/:id', function (req, res) {
 	logger.info('GET /api/library/id with ' + util.inspect(req.params));
 	var userId = req.params.id;
 
-	// TODO: make this call with promises
-	//
+	// TODO 2) make this call with promises
+	
 	// Track.findByUserId(userId).then(function(tracks) {
 	// 	res.writeHead(200, {'Content-Type': 'application/json'});
 	// 	res.end(JSON.stringify(tracks));	
@@ -30,7 +44,7 @@ router.get('/api/library/:id', function(req, res) {
 	// 	res.end();
 	// });
 
-	Track.findByUserId(userId, function(err, tracks) {
+	Track.findByUserId(userId, function (err, tracks) {
 		if (err) {
 			logger.error(err);
 			res.writeHead(400, {'Content-Type': 'application/json'});
@@ -42,37 +56,38 @@ router.get('/api/library/:id', function(req, res) {
 	});
 });
 
-// HTTP DELETE: removes a single track
-router.delete('/api/track/:id', function(req, res) {
-	console.log('DELETE /api/track/ with ' + util.inspect(req.params));
-	var userId = req.params.id,
-		trackId = req.body._id;
-	Track.findByIdAndRemove(trackId, function(err, data){
-		if (err) {
-			logger.error(err);
-			res.writeHead(400, {'Content-Type': 'application/json'});
-			res.end();
-		} else {
-			logger.info(data)
-			res.writeHead(200, {'Content-Type': 'application/json'});
-			res.end(JSON.stringify(data));
-		}
-	});
+/*
+* HTTP GET: gets a single track with id 'id'
+*/ 
+router.get('/track/:id', function (req, res) {
+
+	// TODO: implement
+
 });
 
-// HTTP POST: adds a single track
-router.post('/api/track/:id', function(req, res) {
-	console.log('POST /api/track got req ' + util.inspect(req.body));
+/*
+* HTTP POST: adds a single track
+*
+* The userId should be included in the track data in the request (req.body.userId)
+* If there is no userId, an error will be thrown during Track.create().
+*/
+router.post('/track', function (req, res) {
+	logger.info('POST /api/track got req ' + util.inspect(req.body));
 	var data = req.body;
 
-	Track.create(data).then(function(track) {
+	if (!data) {
+		// do error
+	}
+
+	Track.create(data).then(function (track) {
 		logger.info('created track ', track)
 		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.end(JSON.stringify(data));
+		res.end(JSON.stringify(track));
 	},
-	function(error) {
+	function (error) {
 		logger.error('error creating track', err);
-		if (err.code === 11000) { // duplicate key - assuming it is srcId (dangerous!)
+		// duplicate key - assuming it is srcId (dangerous!)
+		if (err.code === 11000) { 
 			res.writeHead(403, {'Content-Type': 'application/json'});
 			res.end(JSON.stringify('error: track already exists'));
 		} else {
@@ -83,23 +98,25 @@ router.post('/api/track/:id', function(req, res) {
 });
 
 
-// HTTP POST: adds a collection of tracks
-router.post('/api/tracks/:id', function(req, res) {
+/*
+* HTTP POST: adds a collection of tracks
+*
+* Each track should contain the userId.
+*/ 
+router.post('/tracks', function (req, res) {
 	if (req.body && req.body.length) {
 		logger.info('POST /api/tracks got this number of tracks: ' + util.inspect(req.body.length));
-
-		var tracks = req.body,
-			userId = req.params.userId;
+		var data = req.body;
 
 		/*
 		* NOTE: if one fails, no tracks are written and an error is retrned.
 		* MongoDB provides a 'continueOnError' flag, however this is not supported by Mongoose.
 		*/
-		Track.create(tracks).then(function(data) {
-			logger.info('created tracks! data ', data);
-			res.end(JSON.stringify(data));
+		Track.create(data).then(function (tracks) {
+			logger.info('created tracks! ', tracks);
+			res.end(JSON.stringify(tracks));
 		},
-		function(error) {
+		function (error) {
 			logger.debug('creating tracks failed: ', error);
 			var msg = 'error: could not add tracks';
 			if (error.code === 11000) {
@@ -115,7 +132,7 @@ router.post('/api/tracks/:id', function(req, res) {
 });
 
 // Updates a single track (all attributes)
-router.put('/api/track/:id', function(req, res) {
+router.put('/track/:id', function(req, res) {
 	logger.info('PUT /api/track with ' + util.inspect(req.body));
 	var data = req.body;
 	Track.findOneAndUpdate({ _id: data._id }, data, function(err, data) {
@@ -133,7 +150,7 @@ router.put('/api/track/:id', function(req, res) {
 });
 
 // HTTP PATCH: Updates a single track (selected attributes only)
-router.patch('/api/track/:id', function(req, res) {
+router.patch('/track/:id', function(req, res) {
 	logger.info('PUT /api/track with ' + util.inspect(req.body));
 	var data = req.body;
 	Track.findOneAndUpdate({ _id: req.body._id }, req.body, function(err, data) {
@@ -150,7 +167,9 @@ router.patch('/api/track/:id', function(req, res) {
 	});
 });
 
-
+/*
+* HTTP POST: adds a playlist
+*/
 router.post('/api/playlist', function(req, res) {
 	console.log('/api/tracks got this number of tracks: ' + util.inspect(req.body.length));
 	var tracks = req.body;
@@ -161,6 +180,28 @@ router.post('/api/playlist', function(req, res) {
 	// loop through tracks, adding id to list.
 	// if new track encountered, add to db, then add its id to the list.
 
+});
+
+
+/*
+* HTTP DELETE: removes a single track
+*/
+router.delete('/track/:id', function (req, res) {
+	console.log('DELETE /api/track/ with ' + util.inspect(req.params));
+	var userId = req.params.id,
+		trackId = req.body._id;
+
+	Track.findByIdAndRemove(trackId, function (err, data) {
+		if (err) {
+			logger.error(err);
+			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.end();
+		} else {
+			logger.info(data)
+			res.writeHead(200, {'Content-Type': 'application/json'});
+			res.end(JSON.stringify(data));
+		}
+	});
 });
 
 module.exports = router;
