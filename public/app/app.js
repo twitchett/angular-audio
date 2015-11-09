@@ -28,7 +28,7 @@
 	])
 
 	// config block
-	.config(['$routeProvider', 'logEnhancerProvider', function($routeProvider, logEnhancerProvider) {
+	.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
 
 		// configure routing (note: individual routing configs are set in controllers)
 		$routeProvider
@@ -36,7 +36,10 @@
 				redirectTo: '/library'
 			});
 
-		// configure log enhancer - nothing to put here yet
+		// configure http bearer authorization header for all http requests
+		// temporary - this just keeps the backend happy until user login is implemented
+		// NOTE: case is important here! (Bearer not bearer)
+		$httpProvider.defaults.headers.common.Authorization = 'Bearer access_token_1234';
 	}])
 
 	// 'global' constants used throughout app

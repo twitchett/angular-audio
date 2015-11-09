@@ -1,44 +1,87 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
+/* ---------------------------------------------------------/
+*
+* Angular-Audio app.js
+*
+* Express server configuration
+*
+* --------------------------------------------------------- */
+
+// dependencies
+var express = require('express'),
+    path = require('path'),
+    favicon = require('serve-favicon'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    // database
+    mongoose = require('mongoose'),
+    User = require ('./models/user.js'),
+    // passport 
+    passport = require('passport'),
+    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+    YoutubeV3Strategy = require('passport-youtube-v3').Strategy,
+    BearerStrategy = require('passport-http-bearer'),
+    // routes
+    authRoute = require('./routes/auth.js'),
+    scservice = require('./routes/scservice.js'),
+    api = require('./routes/api.js');
+    // properties object
+    config = require('./config.json');
 
 // the server
 var app = express();
 
-// database
-//var models = require('./models/models.js');
-var mongoose = require('mongoose');
-var db = mongoose.connection;
-db.on('error', console.error);
-db.once('open', function() {
-    console.log('connected to mongo :)');
-});
+/* -------------- Set up passport authentication ----------- */
 
-mongoose.connect('mongodb://localhost/audiolib');
+var bearerStrategy = new BearerStrategy(
+    function(token, done) {
+        User.findByToken(token, function(err, user) {
+            if (err)
+                return done(err);
+            if (!user)
+                return done(null, false);
+            return done (null, user, { scope : 'all'} );
+        });
+    }
+);
 
-/* routes/controllers */
-var scservice = require('./routes/scservice.js');
-var api = require('./routes/api.js')
+// var youtubeStrategy = new YoutubeV3Strategy({
+//     clientID: '',
+//     clientSecret: '',
+//     callbackURL: '',
+//     scope: ['https://www.googleapis.com/auth/youtube.readonly']
+//   },
+//   function(token, tokenSecret, profile, done) {
+//     User.findOneAndUpdate(query, update, opts, function(err, user) {});
+//   }
+// );
 
+
+passport.use(bearerStrategy);
+// passport.use(youtubeStrategy);
+
+//var youtubeAuthentication = passport.authenticate('youtube', { failureRedirect: '/auth/error', session: false });
+var tokenAuthentication = passport.authenticate('bearer', { session: false });
+
+/* -------------- Routing/middleware configuration ----------- */
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
+// set the middleware - NOTE: ordering is important here!
+
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/sc', scservice);
-app.use('/api', api);
+app.use(passport.initialize());
+app.use('/auth', authRoute);
+app.use('/sc', scservice);  // this route needs customized authentication: see routes/scservice.js 
+app.use('/api', tokenAuthentication, api);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -46,8 +89,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-// error handlers
 
 // development error handler
 // will print stacktrace
@@ -70,5 +111,17 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
+
+/* ---------------- Database configuration --------------- */
+
+var db = mongoose.connection;
+db.on('error', console.error);
+db.once('open', function() {
+    console.log('connected to mongo :)');
+});
+
+mongoose.connect(config.db.url);
+
+/* --------------------------------------------------------- */
 
 module.exports = app;

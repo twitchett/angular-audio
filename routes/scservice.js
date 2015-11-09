@@ -1,11 +1,9 @@
-var express = require('express'),
-	app = express(),
-	router = express.Router(),
+var router = require('express').Router(),
 	https = require('https'),
 	qs = require('querystring'),
-	fs = require('fs'),
-	log4js = require('log4js'),
-	logger = log4js.getLogger();
+	User = require ('../models/user.js'),
+	logger = require('log4js').getLogger('scservice'),
+	config = require('../config.json');
 
 /* ---------------------------------------------------------/
 *
@@ -17,6 +15,9 @@ var express = require('express'),
 * 	GET /sc/auth
 *	GET /sc/getOAToken
 *
+* TODO: can this functionality br achieved through passport?
+* This was written before passport was incorporated...
+*
 * --------------------------------------------------------- */
 
 // temporary... 
@@ -27,22 +28,23 @@ var authCode = '';
 */
 router.get('/auth', function (req, res) {
 	authCode = req.query.code;
-	logger.debug('/sc/auth: OA2 step 1: got auth code ' + authCode);
+	logger.debug('/auth: OA2 step 1: got auth code ' + authCode);
 	res.render('sccallback');
 })
 
 /*
 * GET /sc/getOAToken
 *
-* Using the authCode obtained in step 1, makes a POST request to SoundCloud
-* to obtain an access token.
-* Returns the token to the client (also needs to be persisted!)
+* Using the authCode obtained in step 1, makes a POST request to SoundCloud to obtain an access token.
+* Returns the token to the client. If an access token is provided in the request, the new soundcloud token is saved on the user model.
+*
+* Not securing this route means that users can use the app without having to go through the signup process
 */
 router.get('/getOAToken', function (req, res) {
 	logger.debug('/sc/getOAToken: OA2 step 2: requesting token from soundcloud.com ')
-	
-	// get app config
-	var config = JSON.parse(fs.readFileSync('./config.json'));
+
+	// error message to return to user (temp)
+	var errMsg = 'There was an error authorizing with SoundCloud';
 
 	// data to send in POST request to SC
 	var postData = qs.stringify({
@@ -68,9 +70,8 @@ router.get('/getOAToken', function (req, res) {
 	var sc_req = https.request(options, function (sc_res) {
 		sc_res.setEncoding('utf8');
 		if (sc_res.statusCode != 200 ) {
-			logger.error('/sc/getOAToken: Error getting access token from Soundcloud, statusCode ' + sc_res.statusCode);
-			res.end();
-			// do something
+			logger.error('/getOAToken: Error getting access token from Soundcloud, statusCode ' + sc_res.statusCode);
+			res.status(500).send(errMsg);
 		} 
 		var data = '';
 		sc_res.on('data', function (chunk) {
@@ -80,8 +81,8 @@ router.get('/getOAToken', function (req, res) {
 			handleResult(data); 
 		});
 		sc_res.on('error', function (e) {
-			logger.error('/sc/getOAToken: error getting response from SoundCloud: ' + e.getMessage());
-			res.end();
+			logger.error('/getOAToken: error getting response from SoundCloud: ' + e.getMessage());
+			res.status(500).send(errMsg);
 		});
 	});
 
@@ -93,20 +94,48 @@ router.get('/getOAToken', function (req, res) {
 	// TODO 2: persist access token in DB
 	function handleResult(data) {
 		if (!data) {
-			logger.error('/sc/getOAToken: no data in handleResult()!');
-			res.end();
+			logger.error('/getOAToken: no data in handleResult()!');
+			res.status(500).send(errMsg);
 		} else {
 			var result = JSON.parse(data);
 			if (result.error != null){
-				logger.error('/sc/getOAToken: Error getting OAuth token from Soundcloud: ' + result.error)
-				res.end();
+				logger.error('/getOAToken: Error getting OAuth2 token from Soundcloud: ' + result.error)
+				res.status(500).send(errMsg)
 			} else {
 				// TODO: process scope/refresh token
-				logger.info('/sc/getOAToken: Success getting Oauth token from Soundcloud: ' + result.access_token);
-				res.end(access_token);
+				// if user is logged in, add access token to user model
+				var access_token = result.access_token
+				logger.info('/getOAToken: Success getting OAuth2 token from Soundcloud: ' + result.access_token);
+				persistToken(req, access_token);
+				res.send(access_token);
 			}
 		}
 	};
+
+	// if the user is authenticated, find the user in the DB and persist the token
+	// we cannot just access the 'user' on the req object because this route is not auth'd with passport
+	function persistToken(req, sc_token) {
+		// extract token from authorization header
+		if (req && req.headers && req.headers.authorization) {
+			var authHeader = req.headers.authorization;
+			var searchStr = "Bearer "; 	// NOTE: case-senstive!
+			
+			// find the user by access token supplied in the original request
+			if (authHeader.indexOf(searchStr) === 0) {
+				var token = authHeader.substring(searchStr.length); 	// perform some checks on token?
+				var query = { primaryToken : token };
+				var update = { soundcloudToken : sc_token };
+				var opts = { new : true};				// returns the updated model
+				console.log('finding by token ' + token);
+				var callback = function(err, user) {
+					if (err) logger.error('persistToken() error saving sc_token: ' + err);
+					else if (user) logger.debug('persistToken() saved sc_token to user ' + user.email);
+					else (logger.warn('persistToken() WTF: could not find user for primary access token ' + token));
+				}
+				User.findOneAndUpdate(query, update, opts, callback);
+			}
+		}
+	}
 });
 
 module.exports = router;

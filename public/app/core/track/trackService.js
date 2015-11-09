@@ -11,11 +11,11 @@
 		var TrackService = {};
 		var log = $log.getInstance('TrackService');
 
-		var POST_TRACK_URL 		= '/api/track/',
-			POST_TRACKS_URL 	= '/api/tracks/',
-			PUT_TRACK_URL		= '/api/track/',
-			GET_LIB_URL			= '/api/library/',
-			DELETE_TRACK_URL	= '/api/track/';
+		var POST_TRACK_URL 		= '/api/track',
+			POST_TRACKS_URL 	= '/api/tracks',
+			PUT_TRACK_URL		= '/api/track',
+			GET_LIB_URL			= '/api/library',
+			DELETE_TRACK_URL	= '/api/track';
 
 		// POSTs the given TrackModel to the database
 		TrackService.save = function(trackModel) {
@@ -25,11 +25,11 @@
 			}
 
 			var postData = extendWithUserData(trackModel);
-			var postUrl = POST_TRACK_URL + userService.getCurrentUser().getUserId();
 
-			return $http.post(postUrl, postData)
+			return $http.post(POST_TRACK_URL, postData)
 				.then(function(response) {	// response: data, status, headers, config
 					log.debug('saved track: ' + trackModel);
+					log.debug('response', response);
 					return new TrackModel(response.data);
 				},
 				function(response){
@@ -47,11 +47,10 @@
 			}
 
 			var postData = trackModels.map(extendWithUserData)
-			var postUrl = POST_TRACKS_URL + userService.getCurrentUser().getUserId();
 
 			console.log('sending data ' + JSON.stringify(postData, null, 4));
 
-			return $http.post(postUrl, postData)
+			return $http.post(POST_TRACKS_URL, postData)
 				.then(function(response) {
 					log.debug('imported ' + response.data.length + ' tracks' );
 
@@ -72,10 +71,7 @@
 
 		// Get all the tracks of the current user
 		TrackService.getAllTracks = function() {
-			var userId = userService.getCurrentUser().getUserId();
-			log.debug('getting library for user with id ' + userId);
-
-			return $http.get(GET_LIB_URL + userId).then(function(response) {
+			return $http.get(GET_LIB_URL).then(function(response) {
 					log.debug('got libary, tracks: ' + response.data.length);
 
 					var trackModels = [];
@@ -85,7 +81,7 @@
 					return trackModels;
 				},
 		 		function(response) {
-					log.error('error getting library for user ' + userId);
+					log.error('error getting library: ', response);
 					return response.data;
 		 		});
 		}
