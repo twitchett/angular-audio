@@ -16,26 +16,20 @@
 				yt : true,
 				sc : true
 			},
-			tags 	: []
+			tags : []
 		}
 
-		vm.controllersubtracks = $scope.subtracks;
+		/* Assign state-holding variables */
 
-		$scope.$watch('subtracks', function(data) {
-			//console.log('watched subtracks ', data);
-		});
-
-		//console.log('LC calling GL whaaat');
-		getLibrary();
-
-		// state
 		vm.filters 		= filters;
 		vm.order 		= 'name';
 		vm.search 		= '';
 		vm.expanded 	= false;
 		vm.animationsEnabled = true;
+		vm.controllersubtracks = $scope.subtracks;
 
-		// behaviour
+		/* Assign functions */
+
 		vm.getLibrary 	= getLibrary;
 		vm.openImport 	= openImport;
 		vm.selectTrack 	= selectTrack;
@@ -44,7 +38,17 @@
 		vm.deleteTrack 	= deleteTrack;
 		vm.getSCNewLikes = getSCNewLikes;
 
-		function getLibrary() {
+		// called upon controller load
+		vm.init = function init() {
+			getLibrary();
+		}
+
+		// testing filtering!
+		$scope.$watch('subtracks', function(data) {
+			//console.log('watched subtracks ', data);
+		});
+
+		var getLibrary = function getLibrary() {
 			libraryService.getLibrary().then(function(data) {
 				vm.tracks = data;
 				console.log('Controller getLibrary() got ' + data.length + ' tracks', data);
@@ -55,14 +59,14 @@
 			});
 		}
 
-		function selectTrack($index, $event) {
+		var selectTrack = function selectTrack($index, $event) {
 			var track = $scope.subtracks[$index];
 			console.log('selected: ' + track.name + ', origIdx ' + track.origIdx);
 			//video.selected = !video.selected; 		---- testing
 			if (track) track.selected = true;
 		}
 
-		function deleteTrack($index, $event) {
+		var deleteTrack = function deleteTrack($index, $event) {
 			$event.stopPropagation();
 			var track = $scope.subtracks[$index];
 			console.log($scope.subtracks.length + ' before, tracks ' + vm.tracks.length + ', deleting track ' + track.name);
@@ -71,7 +75,9 @@
 
 		}
 
-		function openImport(src) {
+		// opens the import window, handled by the ImportXXController
+		// src parameter should be 'yt' or 'sc' for YouTube and SoundCloud respectively
+		var openImport = function openImport(src) {
 			var tplUrl, ctrl;
 			if (src === 'yt') {
 				tplUrl = 'app/components/import/yt/import-yt.html';
@@ -108,7 +114,8 @@
 			});
 		};
 
-		function getSCNewLikes() {
+		// cheeky shortcut (temp)
+		var getSCNewLikes = function getSCNewLikes() {
 			console.log('getNewSCLikes');
 			scService.getNewFavourites().then(function(tracks) {
 				var modalInstance = $modal.open({
@@ -138,12 +145,18 @@
 		}
 
 		// ???????????
-		function expand(expand) {
+		var expand = function expand(expand) {
 			vm.expanded = expand;
 			console.log('expanded: ' + vm.expanded)
 		}
+
+		/* Now initialize */
+		vm.init();
 	}
 
+	/*
+	* Filter: filter tracks by type (yt/sc)
+	*/
 	function TypeFilter() {
 		return function(tracks, filters) {
 			var filtered = [];

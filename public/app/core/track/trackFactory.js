@@ -10,8 +10,6 @@
 		var TrackFactory = {};
 		var log = $log.getInstance('TrackFactory');
 
-		TrackFactory.createNewForLibrary
-
 		/*
 		* Takes an array of json objects and converts to an array of TrackModels.
 		* Does not check for duplicates - importStatus not set.
@@ -22,6 +20,7 @@
 			angular.forEach(data, function(item, idx) {
 				trackModels.push(new TrackModel(item));
 			})
+
 			return trackModels;
 		}
 

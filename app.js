@@ -22,7 +22,7 @@ var express = require('express'),
     YoutubeV3Strategy = require('passport-youtube-v3').Strategy,
     BearerStrategy = require('passport-http-bearer'),
     // routes
-    authRoute = require('./routes/auth.js'),
+    // authRoute = require('./routes/auth.js'),
     scservice = require('./routes/scservice.js'),
     api = require('./routes/api.js');
     // properties object
@@ -33,33 +33,48 @@ var app = express();
 
 /* -------------- Set up passport authentication ----------- */
 
+// Bearer Strategy
+
 var bearerStrategy = new BearerStrategy(
     function(token, done) {
         User.findByToken(token, function(err, user) {
+            console.log('bearer strategy: ', err, user);
             if (err)
                 return done(err);
             if (!user)
                 return done(null, false);
-            return done (null, user, { scope : 'all'} );
+            return done (null, user);
         });
     }
 );
 
-// var youtubeStrategy = new YoutubeV3Strategy({
-//     clientID: '',
-//     clientSecret: '',
-//     callbackURL: '',
-//     scope: ['https://www.googleapis.com/auth/youtube.readonly']
-//   },
-//   function(token, tokenSecret, profile, done) {
-//     User.findOneAndUpdate(query, update, opts, function(err, user) {});
-//   }
-// );
+// YouTube Strategy
 
+var youtubeStrategyOpts = {
+    clientID        : config.gapi.client_id,
+    clientSecret    : config.gapi.client_secret,
+    callbackURL     : config.gapi.callback_url,
+    scope           : [config.gapi.scopes]
+}
+
+var youtubeStrategyCallback = function youtubeStrategyCallback(accessToken, refreshToken, profile, done) {
+    // TODO: add the youtube access token to the mongo user model
+
+    // User.findOneAndUpdate(query, update, opts, function(err, user) {
+    //     if (err)
+    //         return done (err);
+    //     if (!user)
+    //         return done(null, false);
+    //     return done (null, user);
+    // });
+}
+
+var youtubeStrategy = new YoutubeV3Strategy(youtubeStrategyOpts, youtubeStrategyCallback);
 
 passport.use(bearerStrategy);
-// passport.use(youtubeStrategy);
+passport.use(youtubeStrategy);
 
+// not yet implemented
 //var youtubeAuthentication = passport.authenticate('youtube', { failureRedirect: '/auth/error', session: false });
 var tokenAuthentication = passport.authenticate('bearer', { session: false });
 
@@ -79,7 +94,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
-app.use('/auth', authRoute);
+// app.use('/auth', authRoute);
 app.use('/sc', scservice);  // this route needs customized authentication: see routes/scservice.js 
 app.use('/api', tokenAuthentication, api);
 

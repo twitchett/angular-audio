@@ -28,11 +28,11 @@
 		vm.isConnected 			= isConnected;
 		vm.connect 				= connect;
 
-		function isConnected() {
+		var isConnected = function isConnected() {
 			return scAuthService.isReady();
 		}
 
-		function connect() {
+		var connect = function connect() {
 			scAuthService.connect().then(function() {
 				vm.connectErr = false;
 				vm.connected = true;
@@ -44,7 +44,7 @@
 			});
 		}
 
-		function selectItem (index) {
+		var selectItem = function selectItem(index) {
 			var track = vm.tracks[index];
 			console.log(index + ' video selected: ', vm.tracks[index]);
 			//video.selected = !video.selected; 		---- testing
@@ -54,7 +54,7 @@
 		}
 
 		// called on select-all checkbox change
-		function selectAll() {
+		var selectAll = function selectAll() {
 			vm.tracks.map(function(item) {
 				//return angular.extend(item, { selected : vm.selectAllVd } ) --- testing
 				if (item.getImportStatus() === CONST.TRACK.IMPORT.NONE) {
@@ -63,7 +63,7 @@
 			})
 		}
 
-		function getLikes() {
+		var getLikes = function getLikes() {
 			scService.getFavourites().then(function(scTracks) {
 				vm.tracks = scTracks;
 			},
@@ -72,9 +72,9 @@
 			});
 		}
 
-		function importOne($index, $event) {
+		var importOne = function importOne(index, $event) {
 			$event.stopPropagation();
-			var track = vm.tracks[$index];
+			var track = vm.tracks[iindex];
 			if (track) {
 				trackService.save(track).then(function(response) {
 					log.info('import one success ' , response)
@@ -87,7 +87,7 @@
 			}
 		}
 
-		function importAll() {
+		var importAll = function importAll() {
 			console.log('calling trackservice saveall...')
 			var selected = vm.tracks.filter(selectedFilter);
 
@@ -104,7 +104,7 @@
 			});
 		}
 
-		function selectedFilter(item) {
+		var selectedFilter = function selectedFilter(item) {
 			return item.selected;
 		}
 	}

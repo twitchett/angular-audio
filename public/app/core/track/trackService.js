@@ -75,7 +75,7 @@
 			var userId = userService.getCurrentUser().getUserId();
 			log.debug('getting library for user with id ' + userId);
 
-			return $http.get(GET_LIB_URL + userId).then(function(response) {
+			return $http.get(GET_LIB_URL).then(function(response) {
 					log.debug('got libary, tracks: ' + response.data.length);
 
 					var trackModels = [];
@@ -119,7 +119,7 @@
 		}
 
 		// TODO: would be better as a server-side interceptor
-		function extendWithUserData(data) {
+		var extendWithUserData = function extendWithUserData(data) {
 			var id = userService.getCurrentUser().getUserId();
 			var newData = angular.extend(data, { userId : id } );
 

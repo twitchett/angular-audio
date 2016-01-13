@@ -38,11 +38,11 @@
 		vm.isConnected 			= isConnected;
 		vm.connect 				= connect;
 
-		function isConnected() {
+		var isConnected = function isConnected() {
 			return ytAuthService.isReady();
 		}
 
-		function connect() {
+		var connect = function connect() {
 			ytAuthService.connect(false).then(function() {
 				vm.connectErr = false;
 				vm.connected = true;
@@ -55,11 +55,11 @@
 		}
 
 		// called on list-item click
-		function selectPlaylistItem(index) {
+		var selectPlaylistItem = function selectPlaylistItem(index) {
 			vm.playlists[index].selected = !vm.playlists[index].selected;
 		}
 
-		function selectVideoItem (index) {
+		var selectVideoItem = function selectVideoItem(index) {
 			var video = vm.videos[index];
 			console.log(index + ' video selected: ', vm.videos[index]);
 			//video.selected = !video.selected; 		---- testing
@@ -69,7 +69,7 @@
 		}
 
 		// called on select-all checkbox change
-		function selectAll() {
+		var selectAll = function selectAll() {
 			console.log('selectAll with ' + vm.screen);
 			if (vm.screen === PLAYLISTS) {
 				vm.playlists.map(function(item) {
@@ -85,7 +85,7 @@
 			}
 		}
 
-		function importOne($index, $event) {
+		var importOne = function importOne($index, $event) {
 			$event.stopPropagation();
 			if (vm.screen === PLAYLISTS) {
 
@@ -105,7 +105,7 @@
 			}
 		}
 
-		function importAll() {
+		var importAll = function importAll() {
 			if (vm.screen === PLAYLISTS) {
 
 			} 
@@ -126,7 +126,7 @@
 			}
 		}
 
-		function getPlaylists() {
+		var getPlaylists = function getPlaylists() {
 			ytService.getPlaylists().then(function(response) {
 				vm.playlists = response;
 				$scope.$apply();
@@ -136,7 +136,7 @@
 			});
 		}
 
-		function getVideos(idx, $event) {
+		var getVideos = function getVideos(idx, $event) {
 			$event.stopPropagation();
 			var playlist = vm.playlists[idx];
 
@@ -168,15 +168,15 @@
 			}
 		}
 
-		function goToPlaylists() {
+		var goToPlaylists = function goToPlaylists() {
 			vm.screen = PLAYLISTS;
 		}
 
-		function goToVideos() {
+		var goToVideos = function goToVideos() {
 			vm.screen = VIDEOS;
 		}
 
-		function selectedFilter(item) {
+		var selectedFilter = function selectedFilter(item) {
 			return item.selected;
 		}
 	}
