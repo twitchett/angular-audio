@@ -3,7 +3,8 @@
 	'use strict';
 
 	/*
-	* Dummy implementation of a UserService
+	* Dummy implementation of a UserService.
+	* Designed to make external authorization easier but is this really needed?
 	*/
 	function UserService($log, $http, UserModel, ytAuthService, scAuthService, CONST) {
 
