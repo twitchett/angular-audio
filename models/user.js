@@ -10,16 +10,13 @@ var userSchema = new Schema({
 	password: {
 		type: 		String
 	},
-	// temporarily using soundcloud token for primary authentication
 	primaryToken: {
 		type: 		String,
 		index: 		true
 	},
-	// not currently used
 	soundcloudToken: {
 		type: 		String
 	},
-	// not currently used
 	youtubeToken: 	{
 		type: 		String
 	}

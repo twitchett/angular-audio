@@ -5,7 +5,7 @@
 	/*
 	* Handles authorization with SoundCloud. 
 	*/
-	function SCAuthService($log, $http, $q, SC, CONFIG) {
+	function SCAuthService($log, $http, $q, SC) {
 
 		// setup
 		var SCAuthService 	= {},
@@ -13,11 +13,13 @@
 			ready			= false,
 			token 			= null; 	// oauth token
 
+		var OA_TOKEN_URL 	= '/sc/getOAToken';
+
 		SCAuthService.connect = function() {
 			var d = $q.defer();
 
-			var connectCallback = function connectCallback(data) {
-				$http.get(CONFIG.sc.token_url).then(function(response) {
+			function connectCallback(data) {
+				$http.get(OA_TOKEN_URL).then(function(response) {
 					log.debug('got OAuth token for user ');
 					token = response.data;
 					d.resolve();
@@ -65,6 +67,6 @@
 	angular
 		.module('app.import.sc')
 		.run(['$log', 'SC', 'CONFIG', SCAuthRun])
-		.factory('SCAuthService', ['$log','$http', '$q', 'SC', 'CONFIG', SCAuthService]);
+		.factory('SCAuthService', ['$log','$http', '$q', 'SC', SCAuthService]);
 
 })();

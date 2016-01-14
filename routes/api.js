@@ -172,10 +172,7 @@ router.delete('/track/:id', function (req, res) {
 	});
 });
 
-/*
-* Extracts the mongo user ID from the HTTP request
-*/
-var getUserId = function getUserId(req) {
+function getUserId(req) {
 	if (req && req.user) {
 		if (req.user.length == 1) {
 			return req.user[0].id;	
