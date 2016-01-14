@@ -88,13 +88,9 @@ router.get('/getOAToken', function (req, res) {
 		});
 	});
 
-	// send the request
-	sc_req.write(postData);
-	sc_req.end();
-
 	// TODO 1: return something useful on error
 	// TODO 2: persist access token in DB
-	function handleResult(data) {
+	var handleResult = function handleResult (data) {
 		if (!data) {
 			logger.error('/getOAToken: no data in handleResult()!');
 			res.status(500).send(errMsg);
@@ -121,7 +117,7 @@ router.get('/getOAToken', function (req, res) {
 
 	// if the user is authenticated, find the user in the DB and persist the token
 	// we cannot just access the 'user' on the req object because this route is not auth'd with passport
-	function persistToken(req, sc_token) {
+	var persistToken = function persistToken(req, sc_token) {
 		// extract token from authorization header
 		if (req && req.headers && req.headers.authorization) {
 			var authHeader = req.headers.authorization;
@@ -146,6 +142,10 @@ router.get('/getOAToken', function (req, res) {
 			}
 		}
 	}
+
+	// send the request
+	sc_req.write(postData);
+	sc_req.end();
 });
 
 module.exports = router;

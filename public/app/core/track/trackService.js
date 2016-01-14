@@ -11,11 +11,8 @@
 		var TrackService = {};
 		var log = $log.getInstance('TrackService');
 
-		var POST_TRACK_URL 		= '/api/track/',
-			POST_TRACKS_URL 	= '/api/tracks/',
-			PUT_TRACK_URL		= '/api/track/',
-			GET_LIB_URL			= '/api/library/',
-			DELETE_TRACK_URL	= '/api/track/';
+		var API_TRACK_URL 		= '/api/track/',
+			API_TRACKs_URL 		= '/api/tracks/';
 
 		// POSTs the given TrackModel to the server
 		TrackService.save = function(trackModel) {
@@ -25,7 +22,7 @@
 			}
 
 			var postData = extendWithUserData(trackModel);
-			var postUrl = POST_TRACK_URL + userService.getCurrentUser().getUserId();
+			var postUrl = API_TRACK_URL + userService.getCurrentUser().getUserId();
 
 			return $http.post(postUrl, postData)
 				.then(function(response) {	// response: data, status, headers, config
@@ -47,7 +44,7 @@
 			}
 
 			var postData = trackModels.map(extendWithUserData)
-			var postUrl = POST_TRACKS_URL + userService.getCurrentUser().getUserId();
+			var postUrl = API_TRACKS_URL + userService.getCurrentUser().getUserId();
 
 			console.log('sending data ' + JSON.stringify(postData, null, 4));
 
@@ -75,7 +72,7 @@
 			var userId = userService.getCurrentUser().getUserId();
 			log.debug('getting library for user with id ' + userId);
 
-			return $http.get(GET_LIB_URL + userId).then(function(response) {
+			return $http.get(API_TRACKS_URL).then(function(response) {
 					log.debug('got libary, tracks: ' + response.data.length);
 
 					var trackModels = [];
@@ -104,7 +101,7 @@
 				var trackId = trackModels[i].getId();
 
 				if (trackId != null) {
-					$http.get(DELETE_TRACK_URL + trackId)
+					$http.get(API_TRACK_URL + trackId)
 						.then(function(response) {
 							log.debug(response.data);
 						},

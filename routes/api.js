@@ -11,7 +11,7 @@ var router = require('express').Router(),
 * See also: trackService.js in front end
 *
 * Currently working endpoints:
-* 	GET /api/library
+* 	GET /api/tracks
 *	POST /api/tracks
 *	POST /api/track
 *
@@ -23,7 +23,7 @@ var router = require('express').Router(),
 * Returns an array of Track models to the client.
 * TODO 1) rename this route to /tracks!
 */ 
-router.get('/library', function (req, res) {
+router.get('/tracks', function (req, res) {
 	var userId = getUserId(req);
 
 	if (!userId) {

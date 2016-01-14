@@ -79,6 +79,6 @@ Major:
 - Change backend so all mongoose calls use promiss (/routes/api.js)
 - TrackFactory: Figure out optimal way to check for track duplication at front end (in import window)
 - Implement some kind of cache in the front end for tracks
-- Upgrade to Node.js 3
+- Make stuff secure: http://alexbilbie.com/2014/11/oauth-and-javascript/
 - Nicer graphics
 - Automated testing ;)
