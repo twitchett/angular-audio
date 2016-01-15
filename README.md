@@ -8,13 +8,19 @@ So this is an attempt at a solution to the problem. It's also a means for me to 
 
 ## Backend
 
-The backend is built with MongoDB, Mongoose 2.4, Express 4 and Node.js 2. Track objects are stored in the database, and a RESTful (almost) API is exposed that allows CRUD operations on said objects. Passport is used for user authentication.
+The backend is built with MongoDB, Mongoose 2.4, Express 4 and Node.js 4. Track objects are stored in the database, and a RESTful (almost) API is exposed that allows CRUD operations on said objects. Passport is used for user authentication.
 
 API endpoints:
 - HTTP GET /api/track/:id
 - HTTP POST /api/track
 - HTTP POST /api/tracks
 - HTTP DELETE /api/track/:id
+
+All calls to API endpoints require a bearer token set in the Authorization header:
+
+```
+Authorization: Bearer my_access_token
+```
 
 Main file structure: 
 - app.js 
