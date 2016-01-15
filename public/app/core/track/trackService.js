@@ -12,7 +12,7 @@
 		var log = $log.getInstance('TrackService');
 
 		var API_TRACK_URL 		= '/api/track/',
-			API_TRACKs_URL 		= '/api/tracks/';
+			API_TRACKS_URL 		= '/api/tracks/';
 
 		// POSTs the given TrackModel to the server
 		TrackService.save = function(trackModel) {
