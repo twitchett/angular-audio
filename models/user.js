@@ -9,6 +9,7 @@
 	'use strict'
 
 	var mongoose = require('mongoose'),
+		logger = require('log4js').getLogger('usermodel'),
 		Schema = mongoose.Schema;
 
 	var userSchema = new Schema({
@@ -32,8 +33,20 @@
 		}
 	});
 
-	userSchema.statics.findByToken = function(token, callback) {
-		this.find({ primaryToken : token }, callback);
+	// if error or exception encountered, just log and continue/throw respectively
+	userSchema.statics.findByToken = function(token) {
+		return this.find({ primaryToken : token })
+			.exec()
+			.then(
+				user => user,
+				err => {
+					logger.error('User.findByToken error', err);
+					return err;
+				}
+			).catch(ex => {
+				logger.error('User.findByToken exception', err);
+				throw ex;
+			});
 	}
 
 	// TODO: upgrade Mongoose to use accessToken as sub-document

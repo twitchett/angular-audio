@@ -32,23 +32,36 @@
         // properties object
         config = require('./config.json');
 
-    // the server
+    // configure mongoose: use native promises
+    mongoose.Promise = global.Promise;
+
+    // get the server
     var app = express();
 
     /* -------------- Set up passport authentication ----------- */
 
-    // Bearer Strategy (for authorizing our own users)
+    var validateUser = function validateUser(user, callback) {
+        if (!user) {
+            return callback(null, false);
+        }
+        if (user.length === 0) {
+            return callback(null, false);
+        }
+        return callback(user);
+    }
 
     var bearerStrategy = new BearerStrategy((token, done) => {
-            User.findByToken(token,(err, user) => {
-                if (err)
-                    return done(err);
-                if (!user)
-                    return done(null, false);
-                return done (null, user, { scope : 'all'} );
-            });
-        }
-    );
+        User.findByToken(token)
+            .then(
+                user => validateUser(user, done),
+                err => done(err)
+            ).catch(
+                ex => done(ex)
+            );
+    });
+
+
+    passport.use(bearerStrategy);
 
     // YouTube Strategy (for linking YouTube accounts)
 
@@ -71,11 +84,9 @@
         // });
     }
 
-    var youtubeStrategy = new YoutubeV3Strategy(youtubeStrategyOpts, youtubeStrategyCallback);
+    passport.use(new YoutubeV3Strategy(youtubeStrategyOpts, youtubeStrategyCallback));
 
-    passport.use(bearerStrategy);
-    passport.use(youtubeStrategy);
-
+    // Authentication middleware that can be used to secure routes
     var youtubeAuthentication = passport.authenticate('youtube', { failureRedirect: '/auth/error', session: false }); // auth route not yet defined
     var tokenAuthentication = passport.authenticate('bearer', { session: false });
 
