@@ -6,7 +6,6 @@
 	* Library Controller
 	*/
 	function LibraryController($log, $scope, $modal, libraryService, trackService, scService) {
-		console.log('in LibraryController')
 
 		var log	= $log.getInstance('LibraryController'),
 			vm	= this;
@@ -15,18 +14,8 @@
 			src : {
 				yt : true,
 				sc : true
-			},
-			tags 	: []
+			}
 		}
-
-		vm.controllersubtracks = $scope.subtracks;
-
-		$scope.$watch('subtracks', function(data) {
-			//console.log('watched subtracks ', data);
-		});
-
-		//console.log('LC calling GL whaaat');
-		getLibrary();
 
 		// state
 		vm.filters 		= filters;
@@ -34,6 +23,7 @@
 		vm.search 		= '';
 		vm.expanded 	= false;
 		vm.animationsEnabled = true;
+		vm.controllersubtracks = $scope.subtracks;
 
 		// behaviour
 		vm.getLibrary 	= getLibrary;
@@ -44,11 +34,19 @@
 		vm.deleteTrack 	= deleteTrack;
 		vm.getSCNewLikes = getSCNewLikes;
 
+		// just testing
+		$scope.$watch('subtracks', function(data) {
+			console.log('watched subtracks ', data);
+		});
+
+		function init() {
+			getLibrary();
+		}
+
 		function getLibrary() {
 			libraryService.getLibrary().then(function(data) {
 				vm.tracks = data;
 				console.log('Controller getLibrary() got ' + data.length + ' tracks', data);
-				//$scope.$apply();
 			}, function(error) {
 				console.error('Controller getLibrary() got error: ', error)
 				// error
@@ -142,6 +140,8 @@
 			vm.expanded = expand;
 			console.log('expanded: ' + vm.expanded)
 		}
+
+		init();
 	}
 
 	function TypeFilter() {
