@@ -21,27 +21,30 @@
 		User = require ('../models/user.js'),
 		Track = require ('../models/track.js');
 
+	const ERR_CODE_DUPLICATE = 11000;
+
 	/*
 	* HTTP GET: gets the library of user with 'id'
 	*
 	* Returns an array of Track models to the client.
 	*/ 
 	router.get('/tracks', (req, res) => {
-		var userId = getUserId(req);
+		let userId = getUserId(req);
 
 		if (!userId) {
 			res.status(400).send('error: could not get user from request');
 			return;
 		}
 
-		Track.findByUserId(userId, (err, tracks) => {
-			if (err) {
-				logger.error('error getting tracks from db: ', err, req.user);
-				res.status(500).send('error: could not retrieve library');
-			} else {
-				res.send(tracks);
-			}
-		});
+		let errMsg = 'error retrieving tracks for user ' + userId;
+
+		Track.findByUserId(userId)
+			.then
+			(
+				tracks => res.send(tracks),
+				ex => handleError(ex, res, errMsg)
+			)
+			.catch(ex => handleError(ex, res, errMsg));
 	});
 
 	/*
@@ -60,25 +63,35 @@
 	*/
 	router.post('/track', (req, res) => {
 		logger.debug('POST /api/track got req ' + util.inspect(req.body));
-		var data = req.body;
+		let userId = getUserId(req);
 
-		if (!data) {
+		if (!userId) {
+			res.status(400).send('error: could not get user from request');
+			return;
+		}
+
+		// TODO: add userId here e.g. preprocessData(data);
+
+		if (!req.body) {
 			res.status(400).send('error: no data in request');
 		}
 
-		Track.create(data, (err, track) => {
-			if (err) {
-				logger.error('error creating track', err);
-				// duplicate key - assuming it is srcId (dangerous!)
-				if (err.code === 11000) { 
-					res.status(403).send('error: track already exists');
-				} else {
-					res.status(500).send('error: could not save track');
-				}
+		let saveSuccessHandler = function successHandler(track) {
+			res.send(track);
+		}
+
+		let saveErrorHandler = function postErrorHandler(err) {
+			if (err.code === ERR_CODE_DUPLICATE) {
+				res.status(403).send('error: track already exists');
 			} else {
-				res.send(track);
+				handleError(err, res, 'error: could not save track');
 			}
-		});
+		}
+
+		new Track(req.body)
+			.save()
+			.then(saveSuccessHandler, saveErrorHandler)
+		 	.catch(ex => handleError(ex, res, 'error: could not save track'));
 	});
 
 
@@ -91,26 +104,23 @@
 	* NOTE: if a single track fails, all tracks will fail!
 	*/ 
 	router.post('/tracks', (req, res) => {
-		var data = req.body;
+		let data = req.body;
+
 		if (req.body && req.body.length) {
 			logger.debug('POST /api/tracks got this number of tracks: ' + util.inspect(req.body.length));
+			let errMsg = 'error: could not save tracks';
 			
 			/*
 			* NOTE: if one fails, no tracks are written and an error is retrned.
 			* MongoDB provides a 'continueOnError' flag, however this is not supported by Mongoose.
 			*/
-			Track.create(data, (err, tracks) => {
-				if (err) {
-					logger.error('creating tracks failed: ', err);
-					var msg = 'error: could not add tracks';
-					if (error.code === 11000) {
-						msg = 'error: duplicate track(s) found'
-					} 
-					res.status(500).send(msg);
-				} else {
-					res.send(tracks);	
-				}
-			});
+			Track.create(data)
+				.then
+				(
+					tracks => res.send(tracks),
+					err => handleError(err, res, errMsg)
+				)
+				.catch(ex => handleError(ex, res, errMsg));
 
 		} else {
 			res.status(400).send('error: no data in request');
@@ -120,7 +130,7 @@
 	// Updates a single track (all attributes)
 	router.put('/track/:id', (req, res) => {
 		logger.info('PUT /api/track with ' + util.inspect(req.body));
-		var data = req.body;
+		let data = req.body;
 		Track.findOneAndUpdate({ _id: data._id }, data, (err, data) => {
 			// TODO
 		});
@@ -129,7 +139,7 @@
 	// HTTP PATCH: Updates a single track (selected attributes only)
 	router.patch('/track/:id', (req, res) => {
 		logger.info('PATCH /api/track with ' + util.inspect(req.body));
-		var data = req.body;
+		let data = req.body;
 		Track.findOneAndUpdate({ _id: req.body._id }, req.body, (err, data) => {
 			// TODO
 		});
@@ -156,26 +166,32 @@
 	*/
 	router.delete('/track/:id', (req, res) => {
 		logger.debug('DELETE /api/track/ with ' + util.inspect(req.params));
-		var userId = getUserId(req);
-		var trackId = req.params.id;
+		let userId = getUserId(req),
+			trackId = req.params.id;
 
 		if (!userId || !trackId) {
 			res.status(400).send('error: could not get user or track from request');
 			return;
 		}
 
-		Track.findByIdAndRemove(trackId, (err, data) => {
-			if (err) {
-				logger.error(err);
-				res.status(500).send('error: there was an error deleting track ' + trackId)
-			} else {
-				logger.debug(data);
-				res.end();
-			}
-		});
+		let errMsg = 'error: there was an error deleting track ' + trackId;
+
+		Track.findByIdAndRemove(trackId)
+			.exec()
+			.then
+			(
+				() => res.end(),
+				err => handleError(err, res, errMsg)
+			)
+			.catch(ex => handleError(err, res, errMsg));
 	});
 
-	function getUserId(req) {
+	var handleError = function handleError(err, res, msg) {
+		logger.error(err);
+		res.status(500).send(msg);
+	}
+
+	var getUserId = function getUserId(req) {
 		if (req && req.user) {
 			if (req.user.length == 1) {
 				return req.user[0].id;	

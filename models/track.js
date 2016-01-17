@@ -51,8 +51,8 @@
 		playlistIds: 	[String]
 	});
 
-	trackSchema.statics.findByUserId = function (id, callback) {
-		this.find({ userId: id}, callback);
+	trackSchema.statics.findByUserId = function (id) {
+		return this.find({ userId: id}).exec();
 	}
 
 	module.exports = mongoose.model('Track', trackSchema);
