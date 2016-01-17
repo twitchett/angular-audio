@@ -47,7 +47,7 @@
         if (user.length === 0) {
             return callback(null, false);
         }
-        return callback(user);
+        return callback(null, user);
     }
 
     var bearerStrategy = new BearerStrategy((token, done) => {
