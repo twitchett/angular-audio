@@ -1,0 +1,23 @@
+@import "variables";
+
+$rowheight-expanded: 120px;
+$bgcolor-topbar: #E8E8E8;
+
+.library-table {
+
+	&.expanded tbody tr {
+		height: $rowheight-expanded;
+	}
+
+	tbody td {
+		font-size: 14px;
+	}
+
+	thead {
+		background-color: $bgcolor-topbar;
+	}
+
+	.table-col-ratin {
+		font-size: 12px;
+	}
+}

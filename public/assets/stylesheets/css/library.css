@@ -1,0 +1,16 @@
+/* line 8, ../sass/library.scss */
+.library-table.expanded tbody tr {
+  height: 120px;
+}
+/* line 12, ../sass/library.scss */
+.library-table tbody td {
+  font-size: 14px;
+}
+/* line 16, ../sass/library.scss */
+.library-table thead {
+  background-color: #E8E8E8;
+}
+/* line 20, ../sass/library.scss */
+.library-table .table-col-ratin {
+  font-size: 12px;
+}

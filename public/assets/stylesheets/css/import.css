@@ -1,0 +1,62 @@
+/* line 11, ../sass/import.scss */
+.import-window .btn.sign-in {
+  display: block;
+  margin: 5px 0 5px 0;
+}
+/* line 16, ../sass/import.scss */
+.import-window .btn-import {
+  margin-top: 5px;
+  position: absolute;
+  bottom: 18;
+  left: 36;
+}
+/* line 23, ../sass/import.scss */
+.import-window input[type=checkbox] {
+  margin-right: 7px;
+}
+/* line 27, ../sass/import.scss */
+.import-window .playlist-item {
+  overflow: hidden;
+}
+/* line 31, ../sass/import.scss */
+.import-window .playlist-item .videos-link {
+  display: none;
+  float: right;
+}
+/* line 37, ../sass/import.scss */
+.import-window .playlist-item:hover .videos-link {
+  display: inline;
+}
+/* line 41, ../sass/import.scss */
+.import-window .import-list-item {
+  overflow: hidden;
+  height: 120px;
+}
+/* line 46, ../sass/import.scss */
+.import-window .import-list-item.disabled {
+  color: #B3B3B3;
+}
+/* line 50, ../sass/import.scss */
+.import-window .import-list-item .import-item-icon {
+  position: absolute;
+  right: 10;
+}
+/* line 55, ../sass/import.scss */
+.import-window .import-list-item .import-content {
+  width: 370px;
+}
+/* line 59, ../sass/import.scss */
+.import-window .import-list-item .import-content,
+.import-window .import-list-item .import-content-continer,
+.import-window .import-list-item input[type=checkbox] {
+  float: left;
+}
+/* line 65, ../sass/import.scss */
+.import-window .import-list-item .import-title {
+  margin-bottom: 5px;
+}
+/* line 69, ../sass/import.scss */
+.import-window .import-list-item .import-title,
+.import-window .import-list-item .import-description {
+  display: block;
+}

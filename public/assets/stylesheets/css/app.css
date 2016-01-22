@@ -1,0 +1,63 @@
+/* angular UI bootstrap fix */
+/* line 4, ../sass/app.scss */
+.nav, .pagination, .carousel, .panel-title a {
+  cursor: pointer;
+}
+
+/* app css stylesheet */
+/* line 10, ../sass/app.scss */
+.menu {
+  list-style: none;
+  border-bottom: 0.1em solid black;
+  margin-bottom: 2em;
+  padding: 0 0 0.5em;
+}
+
+/* line 17, ../sass/app.scss */
+.menu:before {
+  content: "[";
+}
+
+/* line 21, ../sass/app.scss */
+.menu:after {
+  content: "]";
+}
+
+/* line 25, ../sass/app.scss */
+.menu > li {
+  display: inline;
+}
+
+/* line 29, ../sass/app.scss */
+.menu > li:before {
+  content: "|";
+  padding-right: 0.3em;
+}
+
+/* line 34, ../sass/app.scss */
+.menu > li:nth-child(1):before {
+  content: "";
+  padding: 0;
+}
+
+/* line 39, ../sass/app.scss */
+.modal-fit .modal-dialog {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  padding: 10px;
+}
+
+/* line 48, ../sass/app.scss */
+.modal-fit .modal-body {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
+/* app wide styles */
+/* line 55, ../sass/app.scss */
+.selected {
+  background-color: #F2F1F5;
+}

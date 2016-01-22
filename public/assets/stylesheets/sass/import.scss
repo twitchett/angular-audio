@@ -1,0 +1,74 @@
+@import "variables";
+
+$item-height: 120px;
+
+@mixin list-item {
+  overflow: hidden;
+}
+
+.import-window {
+
+  .btn.sign-in {
+    display: block;
+    margin: 5px 0 5px 0;
+  }
+
+  .btn-import {
+    margin-top: 5px;
+    position: absolute;
+    bottom: 18;
+    left: 36;
+  }
+
+  input[type=checkbox] {
+    margin-right: 7px;
+  }
+  
+  .playlist-item {
+
+    @include list-item;
+
+    .videos-link {
+      display: none;
+      float: right;
+    }
+  }
+
+  .playlist-item:hover .videos-link {
+    display: inline;
+  }
+
+  .import-list-item {
+
+    @include list-item;
+    height: $item-height;
+
+    &.disabled {
+      color: $fontcolor-disabled;
+    }
+
+    .import-item-icon {
+      position: absolute;
+      right: 10;
+    }
+
+    .import-content {
+      width: 370px;
+    }
+
+    .import-content,
+    .import-content-continer,
+    input[type=checkbox] {
+      float: left;
+    }
+
+    .import-title {
+      margin-bottom: 5px;
+    }
+
+    .import-title,
+    .import-description {
+      display: block;
+    }
+  }
+}
