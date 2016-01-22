@@ -36,10 +36,18 @@
 				redirectTo: '/library'
 			});
 
-		// configure http bearer authorization header for all http requests
-		// temporary - this just keeps the backend happy until user login is implemented
-		// NOTE: case is important here! (Bearer not bearer)
-		$httpProvider.defaults.headers.common.Authorization = 'Bearer access_token_1234';
+		// quick & dirty authentication for all api requests
+		$httpProvider.interceptors.push(function() {
+			var interceptor = {};
+			interceptor.request = function(config) {
+				if (config.url.lastIndexOf('/api', 0) === 0) {
+					config.headers.authorization = 'Bearer access_token_1234';
+				}
+				return config;
+			}
+			return interceptor;
+		});
+
 	}])
 
 	// 'global' constants used throughout app
@@ -55,7 +63,7 @@
 				'NONE'		: 'none'
 			}
 		}
-	});
+	})
 
 	/*
 	* Manually bootstrap application with data from server.

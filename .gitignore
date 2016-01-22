@@ -3,6 +3,7 @@ node_modules/
 public_old/
 public/bower_components
 public/app/config.json
+public/assets/css/sass/.sass-cache/
 
 # Compiled source #
 ###################

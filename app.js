@@ -22,9 +22,8 @@
         User = require ('./models/user.js'),
         // passport 
         passport = require('passport'),
-        ppAuth = require('./ppAuthentication'),
-        tokenAuthentication = require('./ppAuthentication').tokenAuthentication,
-        youtubeAuthentication = require('./ppAuthentication').youtubeAuthentication,
+        tokenAuthentication = require('./passportStrategies').tokenAuthentication,
+        youtubeAuthentication = require('./passportStrategies').youtubeAuthentication,
         // routes
         // authRoute = require('./routes/auth.js'),
         scAuth = require('./routes/scAuth.js'),

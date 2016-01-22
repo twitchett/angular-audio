@@ -35,7 +35,6 @@
 		vm.selectPlaylistItem  	= selectPlaylistItem;
 		vm.selectVideoItem 		= selectVideoItem;
 		vm.selectAll 			= selectAll;
-		vm.isConnected 			= isConnected;
 		vm.connect 				= connect;
 
 		function isConnected() {
