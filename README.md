@@ -1,4 +1,4 @@
-# angular-audio
+# WinApp
 
 Organize and manage the tunes you listen to on Soundcloud and YouTube in one location. A work in progress!
 
