@@ -5,7 +5,8 @@
 	/*
 	* Responsible for OAuth2 authentication with YouTube.
 	*/
-	function YTAuthService($log, $http, $q, CONFIG) {
+	function YTAuthService($log, $http, $q, userService, CONFIG, CONST) {
+		
 		// setup
 		var YTAuthService 	= {},
 			log 			= $log.getInstance('YTAuthService');
@@ -16,7 +17,10 @@
 
 			return doAuth(immediate).then(function(response) {
 
-				// send access token to server
+				if (isBearerToken(response)) {
+					userService.saveAccessToken(CONST.ORIGIN.YT, response.access_token);
+				}
+
 				return true;
 
 			}, function(err) {
@@ -37,6 +41,7 @@
 
 		YTAuthService.disconnect = function() {
 			gapi.auth.signOut();
+			userService.removeAccessToken(CONST.ORIGIN.YT);
 		}
 
 		// private methods
@@ -52,11 +57,11 @@
 				immediate	: immediate
 			}
 
-			//console.warn('NOT AUTHORIZING GAPI');
 			log.debug('authorizing with opts ', opts);
 
 			gapi.auth.authorize(opts, function(response) {
 				console.log('in callback function, response is ', response)
+
 				if (response && !response.error) {
 					log.info('resolving promise')
 					q.resolve(response);
@@ -68,16 +73,9 @@
 
 			return q.promise;
 		}
- 
-		// upon successful authorization, response will contain access token. "gapi" saves this for us.
-		var handleAuthResponse = function(response) {
-			console.log('handling result', response);
-			if (response && !response.error) {
-				// success: nothing to do yet
-			} else {
-				console.log('gapi authorization error: ', response)
-				// error: tell the controller
-			}
+
+		var isBearerToken = function(response) {
+			return (response && response.acess_token && response.token_type === 'Bearer');
 		}
 
 		return YTAuthService;
@@ -113,6 +111,6 @@
 	angular
 	 	.module('app.import.yt')
 	 	.run(['$window', '$log', 'YTAuthService', YTAuthRun])
-		.factory('YTAuthService', ['$log','$http', '$q', 'CONFIG', YTAuthService]);
+		.factory('YTAuthService', ['$log','$http', '$q', 'UserService', 'CONFIG', 'CONST', YTAuthService]);
 
 })();

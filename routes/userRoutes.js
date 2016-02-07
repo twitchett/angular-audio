@@ -37,11 +37,10 @@
 			let token = data.access_token;
 
 			User.setAccessToken(service, token)
-				.then(function(data){
-					logger.info('token saved', data);
-				}, function(err) {
-					logger.error('error saving token', err)
-				});
+				.then(
+					data => logger.info('token saved', data),
+					err => logger.error('error saving token', err)
+				);
 
 		} else {
 			res.status(400).send('error: no data in request');
@@ -52,24 +51,26 @@
 	* 
 	*/
 	router.delete('/acessToken/:service', (req, res) => {
-		let service = req.params.service;
+		if (req.params) {
 
-		if (!(service === 'sc' || service === 'yt')) {
-			// throw a wobble
-		}
+			let service = req.params.service;
 
-		User.setAccessToken(service, null)
-			.then(function(data){
-				logger.info('token deleted', data);
-				res.send(true);
+			if (!(service === 'sc' || service === 'yt')) {
+				// throw a wobble
+				res.status(400).send('error: unrecognised sevicecode parameter');
+			}
 
-			}, function(err) {
-				logger.error('error deleting token', err)
-				res.send(false);
-			});
-
-		} else {
-			res.status(400).send('error: no data in request');
+			User.setAccessToken(service, null).then(
+				data =>
+				{
+					logger.info('token deleted', data);
+					res.send(true);
+				}, 
+				err => 
+				{
+					logger.error('error deleting token', err)
+					res.send(false);
+				})
 		}
 
 	})
