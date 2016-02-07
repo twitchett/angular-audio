@@ -9,6 +9,7 @@
 		// angular modules
 		'ngRoute',
 		'ngResource',
+		'ngCookies',
 
 		// external libraries/components encapsulated as an angular module (SC, underscore, etc)
 		'app.external',
@@ -36,17 +37,22 @@
 				redirectTo: '/library'
 			});
 
-		// quick & dirty authentication for all api requests
-		$httpProvider.interceptors.push(function() {
+		function APIInterceptor($injector, $q) {
 			var interceptor = {};
-			interceptor.request = function(config) {
-				if (config.url.lastIndexOf('/api', 0) === 0) {
+
+			interceptor.request = function APIInterceptor_request(config) {
+				if (config && config.url && (config.url.lastIndexOf('/', 0) === 0))  {
+
 					config.headers.authorization = 'Bearer access_token_1234';
 				}
 				return config;
 			}
+
 			return interceptor;
-		});
+		}
+
+		// quick & dirty authentication for all api requests
+		$httpProvider.interceptors.push(APIInterceptor);
 
 	}])
 
@@ -74,17 +80,42 @@
 		// manually retrieve the angular $http service
 		var $http = angular.injector(['ng']).get('$http');
 
-		// path to config file on server
-		$http.get('/app/config.json').then(function(response) {
-			// set as constant
-			angular.module('app').constant('CONFIG', response.data);
+		var getConfig = function() {
+			return $http.get('/app/config.json')
+				.then(function(response)
+				{
+					angular.module('app').constant('CONFIG', response.data);
+					return;
+				}, function(error)
+				{
+					// TODO: if this fails, the app will not work!
+					throw(error);
+				})
+		}
 
-			// now bootstrap application
+		// TODO: get token from cookie (or somewhere)
+
+		var getUser = function() {
+			return $http.get('/user', { headers: {'Authorization': 'Bearer access_token_1234' }})
+				.then(function(response)
+				{
+					angular.module('app').value('UserData', response.data);
+					return;
+
+				}, function(error)
+				{
+					// if this fails, we have no logged in user, but the app will still work
+					angular.module('app').value('UserData', null);
+					return;
+				});
+			}
+
+		var doBootstrap = function() {
 			angular.bootstrap(document, ['app']);
+		}
 
-		}, function(error) {
-			// TODO: if the ajax fails, we need to retry or the app will not start!
-		});
+		getConfig().then(getUser).then(doBootstrap);
+
 	});
 
 })();

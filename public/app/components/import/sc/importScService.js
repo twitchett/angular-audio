@@ -8,9 +8,7 @@
 	function SCService($log, $http, $q, SC, scAuthService, trackFactory, CONST) {
 		// setup
 		var SCService 	= {},
-			log 		= $log.getInstance('SCService'),
-			ready		= false,
-			token 		= null; 	// oauth token
+			log 		= $log.getInstance('SCService');
 
 		var SC_STREAM_URL 	= '/tracks/', 			// needed?
 			SC_FAVS_URL		= 'https://api.soundcloud.com/me/favorites.json?order=favourited_at',
@@ -34,7 +32,7 @@
 		// private methods
 		function makeGetFavoritesRequest(selectionFn) {
 			if (!scAuthService.isReady()) {
-				log.debug('rejecting promise: no auth token (' + typeof self.token + ')');
+				log.debug('cannot do makeGetFavoritesRequest: user not authenticated');
 				return $q.reject('user not authenticated');
 			} 
 

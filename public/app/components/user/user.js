@@ -3,7 +3,7 @@
 	'use strict';
 
 	angular
-		.module('app.user', ['ngRoute', 'app.logEnhancer', 'app.import.sc', 'app.import.yt'])
+		.module('app.user', ['ngRoute', 'app.logEnhancer'])
 		.constant('USER', function() {
 			return {
 				// TODO

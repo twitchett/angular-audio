@@ -6,58 +6,82 @@
 	* Dummy implementation of a UserService.
 	* Designed to make external authorization easier but is this really needed?
 	*/
-	function UserService($log, $http, UserModel, ytAuthService, scAuthService, CONST) {
+	function UserService($log, $http, UserModel, CONST) {
 
 		var UserService = {};
 		var log = $log.getInstance('UserService');
+		var currentUser = null;
 
-		var thisUser = new UserModel('54302d72625533f01be231cb');
-
-		var yt = CONST.ORIGIN.YT,
-			sc = CONST.ORIGIN.SC
+		var yt = CONST.ORIGIN.YT, sc = CONST.ORIGIN.SC;
 		
-		var services = {
-			yt : ytAuthService,
-			sc : scAuthService
+		var ACCESS_TOKEN_URL = '/user/accessToken';
+
+		UserService.getCurrentUser = function getCurrentUser() {
+			return this.currentUser;			
 		}
 
-		UserService.getCurrentUser = function() {
-			return thisUser;			
+		UserService.setCurrentUser = function setUser(user) {
+			this.currentUser = user;
 		}
 
-		UserService.login = function(username, password) {
+		UserService.saveAccessToken = function setAccessToken(serviceCode, token) {
 
-		}
-
-		UserService.logout = function() {
-			
-		}
-
-		UserService.connect = function(serviceCode) {
-			var service = services[serviceCode];
-
-			if (service) {
-				if (serviceCode === ORIGIN.YT)
-					return service.connect(false);
-				else
-					return service.connect();
-			} else {
-				log.warn('connect(): could not find service for serviceCode ' + serviceCode);
-				return null;
+			var postData = {
+				service : serviceCode,
+				access_token : token
 			}
+
+			return $http.post(ACCESS_TOKEN_URL, postData)
+				.then(function(response)
+				{	
+					log.debug('save token response: ' + response);
+
+					// should we really set the token here? then it exists in 3 places!
+					return currentuser.setAccessToken(serviceCode, token);
+				},
+				function(response){
+					log.debug('save token error: ' , response);
+					return response.data;
+				});
 		}
 
-		UserService.isAuthorized = function(serviceCode) {
-			var service = services[serviceCode];
+		UserService.removeAccessToken = function removeAccessToken(serviceCode) {
+			var url = ACCESS_TOKEN_URL + '/' + serviceCode;
 
-			if (service) return service.isReady();
-			else log.warn('isAuthorized(): no service found for serviceCode ' + serviceCode)
+			return $http.delete(url)
+				.then(function(response)
+				{	
+					log.debug('delete token response: ' + response);
+					return currentuser.setAccessToken(serviceCode, null);
+				},
+				function(response)
+				{
+					log.debug('delete token error: ' , response);
+					return response.data;
+				});
 		}
 
 		return UserService;
 	}
 
+	function UserServiceRun(userService, UserModel, UserData) {
+
+		var userModel;
+		
+		if (UserData) {
+			// userData is obtained during manual bootstrapping and converted to UserModel here. bit iffy...
+			userModel = new UserModel(UserData)
+		} else {
+			// create anon user (TODO)
+			userModel = new UserModel({ _id: 'anon'})
+		}
+
+		userService.setCurrentUser(userModel);
+		angular.module('app').value('UserData', null);
+	}
+
 	angular
 		.module('app.user')
-		.factory('UserService', ['$log', '$http', 'UserModel', 'YTAuthService', 'SCAuthService', 'CONST', UserService]);
+		.run(['UserService', 'UserModel', 'UserData', UserServiceRun])
+		.factory('UserService', ['$log', '$http', 'UserModel', 'CONST', UserService]);
 })();

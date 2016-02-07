@@ -27,6 +27,7 @@
         // routes
         // authRoute = require('./routes/auth.js'),
         scAuth = require('./routes/scAuth.js'),
+        userRoutes = require('./routes/userRoutes.js'),
         api = require('./routes/api.js'),
         // properties object
         config = require('./config.json');
@@ -53,6 +54,7 @@
     app.use(passport.initialize());
     // app.use('/auth', authRoute);
     app.use('/sc', scAuth);  // this route needs customized authentication: see routes/scservice.js 
+    app.use('/user', tokenAuthentication, userRoutes);
     app.use('/api', tokenAuthentication, api);
 
     // catch 404 and forward to error handler

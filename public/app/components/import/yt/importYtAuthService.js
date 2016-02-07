@@ -13,7 +13,22 @@
 		// public methods
 
 		YTAuthService.connect = function(immediate) {
-			return doAuth(immediate);
+
+			return doAuth(immediate).then(function(response) {
+
+				// send access token to server
+				return true;
+
+			}, function(err) {
+
+				// if there was a problem with immediate=true, try again with immediate=false (this triggers dialog)
+				if (immediate) {
+					return doAuth(false);
+				} else {
+					return err;
+				}
+
+			});
 		}
 
 		YTAuthService.isReady = function() {

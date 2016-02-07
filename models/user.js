@@ -49,6 +49,19 @@
 			});
 	}
 
+	userSchema.method.setAccessToken = function(type, token) {
+		if (type === 'primary') {
+			this.primaryToken = token;
+		}
+		if (type === 'sc') {
+			this.soundcloudToken = token;
+		}
+		if (type === 'yt') {
+			this.youtubeToken = token;
+		}
+		return this.save().exec();
+	}
+
 	// TODO: upgrade Mongoose to use accessToken as sub-document
 	// Mongoose 2.4+ now supports 1-to-1 embedded documents
 	var accessTokenSchema = new Schema({
