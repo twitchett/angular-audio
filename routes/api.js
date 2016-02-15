@@ -104,6 +104,7 @@
 	* NOTE: if a single track fails, all tracks will fail!
 	*/ 
 	router.post('/tracks', (req, res) => {
+		let userId = getUserId(req);
 		let data = req.body;
 
 		if (req.body && req.body.length) {
