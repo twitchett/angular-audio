@@ -28,7 +28,8 @@
         // authRoute = require('./routes/auth.js'),
         scAuth = require('./routes/scAuth.js'),
         userRoutes = require('./routes/userRoutes.js'),
-        api = require('./routes/api.js'),
+        tracksApi = require('./routes/api.js'),
+        tagsApi = require('./routes/tagRoutes.js'),
         // properties object
         config = require('./config.json');
 
@@ -55,7 +56,8 @@
     // app.use('/auth', authRoute);
     app.use('/sc', scAuth);  // this route needs customized authentication: see routes/scservice.js 
     app.use('/user', tokenAuthentication, userRoutes);
-    app.use('/api', tokenAuthentication, api);
+    app.use('/api', tokenAuthentication, tracksApi);
+    app.use('/api', tokenAuthentication, tagsApi);
 
     // catch 404 and forward to error handler
     app.use((req, res, next) => {
@@ -70,6 +72,7 @@
     // will print stacktrace
     if (app.get('env') === 'development') {
         app.use((err, req, res, next) => {
+            console.error('in express error handler', err)
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,

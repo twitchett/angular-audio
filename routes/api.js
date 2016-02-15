@@ -8,6 +8,7 @@
 * 	GET /api/tracks
 *	POST /api/tracks
 *	POST /api/track
+*	POST /api/track/:id
 *
 * --------------------------------------------------------- */
 
@@ -16,41 +17,38 @@
 	'use strict';
 
 	var router = require('express').Router(),
-		logger = require('log4js').getLogger('api'),
+		logger = require('log4js').getLogger('api-tracks'),
 		util = require('util'),
 		User = require ('../models/user.js'),
 		Track = require ('../models/track.js');
-
-	const ERR_CODE_DUPLICATE = 11000;
+		
+	const ERR_MSG_NO_USERID = 'error: could not get user from request';
 
 	/*
 	* HTTP GET: gets the library of user with 'id'
 	*
 	* Returns an array of Track models to the client.
 	*/ 
-	router.get('/tracks', (req, res) => {
+	router.get('/tracks', (req, res, next) => {
 		let userId = getUserId(req);
 
 		if (!userId) {
-			res.status(400).send('error: could not get user from request');
-			return;
+			return next(new Error(ERR_MSG_NO_USERID));
 		}
-
-		let errMsg = 'error retrieving tracks for user ' + userId;
 
 		Track.findByUserId(userId)
 			.then
 			(
 				tracks => res.send(tracks),
-				ex => handleError(ex, res, errMsg)
+				err => next(err)
 			)
-			.catch(ex => handleError(ex, res, errMsg));
+			.catch(ex => next(ex));
 	});
 
 	/*
 	* HTTP GET: gets a single track with id 'id'
 	*/ 
-	router.get('/track/:id', (req, res) => {
+	router.get('/track/:id', (req, res, next) => {
 		// TODO: implement
 	});
 
@@ -61,19 +59,18 @@
 	* The userId should be included in the track data in the request (req.body.userId)
 	* If there is no userId, an error will be thrown during Track.create().
 	*/
-	router.post('/track', (req, res) => {
+	router.post('/track', (req, res, next) => {
 		logger.debug('POST /api/track got req ' + util.inspect(req.body));
 		let userId = getUserId(req);
 
 		if (!userId) {
-			res.status(400).send('error: could not get user from request');
-			return;
+			return next(new Error(ERR_MSG_NO_USERID));
 		}
 
 		// TODO: add userId here e.g. preprocessData(data);
 
 		if (!req.body) {
-			res.status(400).send('error: no data in request');
+			return next(new Error('POST /api/track error: no data in request'));
 		}
 
 		let saveSuccessHandler = function successHandler(track) {
@@ -81,17 +78,13 @@
 		}
 
 		let saveErrorHandler = function postErrorHandler(err) {
-			if (err.code === ERR_CODE_DUPLICATE) {
-				res.status(403).send('error: track already exists');
-			} else {
-				handleError(err, res, 'error: could not save track');
-			}
+			return next(err);
 		}
 
 		new Track(req.body)
 			.save()
 			.then(saveSuccessHandler, saveErrorHandler)
-		 	.catch(ex => handleError(ex, res, 'error: could not save track'));
+		 	.catch(ex => next(ex));
 	});
 
 
@@ -103,13 +96,17 @@
 	*
 	* NOTE: if a single track fails, all tracks will fail!
 	*/ 
-	router.post('/tracks', (req, res) => {
+	router.post('/tracks', (req, res, next) => {
 		let userId = getUserId(req);
+
+		if (!userId) {
+			return next(new Error(ERR_MSG_NO_USERID));
+		}
+
 		let data = req.body;
 
 		if (req.body && req.body.length) {
 			logger.debug('POST /api/tracks got this number of tracks: ' + util.inspect(req.body.length));
-			let errMsg = 'error: could not save tracks';
 			
 			/*
 			* NOTE: if one fails, no tracks are written and an error is retrned.
@@ -119,17 +116,50 @@
 				.then
 				(
 					tracks => res.send(tracks),
-					err => handleError(err, res, errMsg)
+					err => next(err)
 				)
-				.catch(ex => handleError(ex, res, errMsg));
+				.catch(ex => next(ex));
 
 		} else {
-			res.status(400).send('error: no data in request');
+			return next(new Error('error: no data in request'));
 		}
 	});
 
-	// Updates a single track (all attributes)
-	router.put('/track/:id', (req, res) => {
+
+	/*
+	* Updates track properties (not tags)
+	*/
+	router.post('/track/:id', (req, res, next) => {
+		let userId = getUserId(req);
+
+		if (!userId) {
+			return next(new Error(ERR_MSG_NO_USERID));
+		}
+
+		if (req.body) {
+			let data = req.body;
+			let trackId = req.params.id;
+			
+			Track.findOneAndUpdate
+			(
+				{ userId : userId, _id : trackId },
+				{ $addToSet : data },
+				{ new : true }
+			)
+			.exec()
+			.then
+			(
+				data => res.send(data),
+				err => next(err)
+			);
+		} else {
+			return next(new Error('error: no data in request'));
+		}
+
+	});
+
+	// Replaces a track
+	router.put('/track/:id', (req, res, next) => {
 		logger.info('PUT /api/track with ' + util.inspect(req.body));
 		let data = req.body;
 		Track.findOneAndUpdate({ _id: data._id }, data, (err, data) => {
@@ -137,19 +167,10 @@
 		});
 	});
 
-	// HTTP PATCH: Updates a single track (selected attributes only)
-	router.patch('/track/:id', (req, res) => {
-		logger.info('PATCH /api/track with ' + util.inspect(req.body));
-		let data = req.body;
-		Track.findOneAndUpdate({ _id: req.body._id }, req.body, (err, data) => {
-			// TODO
-		});
-	});
-
 	/*
 	* HTTP POST: adds a playlist
 	*/
-	router.post('/api/playlist', (req, res) => {
+	router.post('/playlist', (req, res, next) => {
 		logger.info('/api/tracks got this number of tracks: ' + util.inspect(req.body.length));
 		var tracks = req.body;
 
@@ -165,14 +186,13 @@
 	/*
 	* HTTP DELETE: removes a single track
 	*/
-	router.delete('/track/:id', (req, res) => {
+	router.delete('/track/:id', (req, res, next) => {
 		logger.debug('DELETE /api/track/ with ' + util.inspect(req.params));
-		let userId = getUserId(req),
-			trackId = req.params.id;
+		let userId = getUserId(req);
+		let	trackId = req.params.id;
 
-		if (!userId || !trackId) {
-			res.status(400).send('error: could not get user or track from request');
-			return;
+		if (!userId) {
+			return next(new Error(ERR_MSG_NO_USERID));
 		}
 
 		let errMsg = 'error: there was an error deleting track ' + trackId;
@@ -182,15 +202,10 @@
 			.then
 			(
 				() => res.end(),
-				err => handleError(err, res, errMsg)
+				err => next(err)
 			)
-			.catch(ex => handleError(err, res, errMsg));
+			.catch(ex => next(ex));
 	});
-
-	var handleError = function handleError(err, res, msg) {
-		logger.error(err);
-		res.status(500).send(msg);
-	}
 
 	var getUserId = function getUserId(req) {
 		if (req && req.user) {
