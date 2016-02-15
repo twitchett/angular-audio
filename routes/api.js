@@ -20,9 +20,8 @@
 		logger = require('log4js').getLogger('api-tracks'),
 		util = require('util'),
 		User = require ('../models/user.js'),
-		Track = require ('../models/track.js');
-		
-	const ERR_MSG_NO_USERID = 'error: could not get user from request';
+		Track = require ('../models/track.js'),
+		apiUtils = require('../apiUtils.js');
 
 	/*
 	* HTTP GET: gets the library of user with 'id'
@@ -30,10 +29,10 @@
 	* Returns an array of Track models to the client.
 	*/ 
 	router.get('/tracks', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msg.ERR_MSG_NO_USERID));
 		}
 
 		Track.findByUserId(userId)
@@ -61,10 +60,10 @@
 	*/
 	router.post('/track', (req, res, next) => {
 		logger.debug('POST /api/track got req ' + util.inspect(req.body));
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		// TODO: add userId here e.g. preprocessData(data);
@@ -97,10 +96,10 @@
 	* NOTE: if a single track fails, all tracks will fail!
 	*/ 
 	router.post('/tracks', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		let data = req.body;
@@ -130,10 +129,10 @@
 	* Updates track properties (not tags)
 	*/
 	router.post('/track/:id', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		if (req.body) {
@@ -188,11 +187,11 @@
 	*/
 	router.delete('/track/:id', (req, res, next) => {
 		logger.debug('DELETE /api/track/ with ' + util.inspect(req.params));
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 		let	trackId = req.params.id;
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		let errMsg = 'error: there was an error deleting track ' + trackId;
@@ -206,18 +205,6 @@
 			)
 			.catch(ex => next(ex));
 	});
-
-	var getUserId = function getUserId(req) {
-		if (req && req.user) {
-			if (req.user.length == 1) {
-				return req.user[0].id;	
-			} else {
-				logger.warn('api getUserId(): unexpected req.user object: ', req.user)
-			}
-		} else {
-			if (req) logger.warn('api getUserId(): unexpected req.user object: ', req.user)
-		}
-	}
 
 	module.exports = router;
 

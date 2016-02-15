@@ -18,9 +18,8 @@
 		logger = require('log4js').getLogger('api-tags'),
 		util = require('util'),
 		User = require ('../models/user.js'),
-		Track = require ('../models/track.js');
-	
-	const ERR_MSG_NO_USERID = 'error: could not get user from request';
+		Track = require ('../models/track.js'),
+		apiUtils = require('../apiUtils.js');
 
 	/*
 	* HTTP GET: gets all tags from a collection
@@ -28,10 +27,10 @@
 	* Returns an array of Strings.
 	*/
 	router.get('/tags', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		Track.find({ userId : userId })
@@ -61,10 +60,10 @@
 	* TODO - this should really be PUT
 	*/
 	router.post('/track/:id/tags', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		if (req.body) {
@@ -95,10 +94,10 @@
 	* Returns the modified Track object
 	*/
 	router.delete('/track/:id/tags/:tag', (req, res, next) => {
-		let userId = getUserId(req);
+		let userId = apiUtils.getUserId(req);
 
 		if (!userId) {
-			return next(new Error(ERR_MSG_NO_USERID));
+			return next(new Error(apiUtils.msgs.ERR_MSG_NO_USERID));
 		}
 
 		let trackId = req.params.id;
@@ -118,18 +117,6 @@
 		);
 
 	});
-
-	var getUserId = function getUserId(req) {
-		if (req && req.user) {
-			if (req.user.length == 1) {
-				return req.user[0].id;	
-			} else {
-				logger.warn('api getUserId(): unexpected req.user object: ', req.user)
-			}
-		} else {
-			if (req) logger.warn('api getUserId(): unexpected req.user object: ', req.user)
-		}
-	}
 
 	module.exports = router;
 
