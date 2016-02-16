@@ -12,7 +12,8 @@
 		var log = $log.getInstance('TrackService');
 
 		var API_TRACK_URL 		= '/api/track/',
-			API_TRACKS_URL 		= '/api/tracks/';
+			API_TRACKS_URL 		= '/api/tracks/',
+			API_TAGS_URL		= '/api/tags/';
 
 		// POSTs the given TrackModel to the server
 		TrackService.save = function(trackModel) {
@@ -87,6 +88,22 @@
 		 		});
 		}
 
+		TrackService.update = function(trackModel, params) {
+			var url = API_TRACK_URL + trackModel.getId();
+			var data = JSON.stringify(params);
+
+			log.debug('updating track with ', params);
+
+			return $http.post(url, data).then(function(response) {
+				log.debug('got updated track: ', response.data);
+				return response.data;
+			},
+	 		function(response) {
+				log.error('error updating track', response);
+				return false;
+	 		});
+		}
+
 		// Removes all the TrackModels from the database. Expects an array of TrackModels.
 		// Note: unlike saveAll, this is not a batch operation
 		TrackService.deleteAll = function(trackModels) {
@@ -113,6 +130,15 @@
 					log.warn('could not delete track ' + trackModels[i].name + ': no _id found');
 				}
 			}
+		}
+
+		TrackService.getTags = function() {
+			return $http.get(API_TAGS_URL).then(function(response) {
+				log.debug('got tags: ', response.data);
+				return response.data;
+			}, function(response) {
+				log.error('error getting tags', response);
+			});
 		}
 
 		// TODO: would be better as a server-side interceptor

@@ -48,6 +48,7 @@
 		artist: 		String,
 		label: 			String,
 		tags: 			[String],
+		note: 			String, 
 		playlistIds: 	[String]
 	});
 

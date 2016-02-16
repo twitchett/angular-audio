@@ -1,12 +1,28 @@
 @import "variables";
 
 $rowheight-expanded: 120px;
+$rowheight-regular: 41px;
+$addtag-width: 80px;
 $bgcolor-topbar: #E8E8E8;
+
+
+.tag {
+	margin-right: 2px;
+}
 
 .library-table {
 
+	/* override bootstrap's align: top style */
+	&.table-condensed>tbody>tr>td {
+		vertical-align: middle;
+	}
+
 	&.expanded tbody tr {
 		height: $rowheight-expanded;
+	}
+
+	tbody tr {
+		height: $rowheight-regular;
 	}
 
 	tbody td {
@@ -17,7 +33,25 @@ $bgcolor-topbar: #E8E8E8;
 		background-color: $bgcolor-topbar;
 	}
 
-	.table-col-ratin {
+	form {
+		margin: 0;
+	}
+
+	.table-col-rating {
 		font-size: 12px;
+	}
+
+	.table-col-tags form,
+	.table-col-tags input {
+		display: inline-block;
+	}
+
+	.table-col-tags .add-tag-form {
+		float: right;
+		width: $addtag-width + 6px;
+	}
+
+	.table-col-tags input {
+		width: $addtag-width
 	}
 }

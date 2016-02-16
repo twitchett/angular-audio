@@ -17,30 +17,47 @@
 			}
 		}
 
+		var count = 0;
+
 		// state
-		vm.filters 		= filters;
-		vm.order 		= 'name';
-		vm.search 		= '';
-		vm.expanded 	= false;
+		vm.filters 			= filters;
+		vm.order 			= 'name';
+		vm.search 			= '';
+		vm.expanded 		= false;
 		vm.animationsEnabled = true;
 		vm.controllersubtracks = $scope.subtracks;
+		vm.hovered			= null;
+		vm.hoveredNote 		= null;
+		vm.tag 				= null;
+		vm.filteredTags 	= [];
+		vm.tagslist			= null;
+
+		vm.note 			= '';
+		vm.addNotePopoverUrl = 'addNotePopoverTemplate.html';
+		vm.showNotePopoverUrl = 'showNotePopoverTemplate.html';
 
 		// behaviour
-		vm.getLibrary 	= getLibrary;
-		vm.openImport 	= openImport;
-		vm.selectTrack 	= selectTrack;
-		vm.expand 		= expand;
-		vm.editTrack 	= null;
-		vm.deleteTrack 	= deleteTrack;
-		vm.getSCNewLikes = getSCNewLikes;
+		vm.getLibrary 		= getLibrary;
+		vm.openImport 		= openImport;
+		vm.selectTrack 		= selectTrack;
+		vm.expand 			= expand;
+		vm.editTrack 		= null;
+		vm.deleteTrack 		= deleteTrack;
+		vm.getSCNewLikes 	= getSCNewLikes;
+		vm.hover 			= hover;
+		vm.addTag 			= addTag;
+		vm.toggleTag		= toggleTag;
+		vm.addNote 			= addNote;
+		vm.hoverNoteIcon 	= hoverNoteIcon;
 
 		// just testing
-		$scope.$watch('subtracks', function(data) {
-			console.log('watched subtracks ', data);
-		});
+		// $scope.$watch('subtracks', function(data) {
+		// 	console.log('watched subtracks ', data);
+		// });
 
 		function init() {
 			getLibrary();
+			getTags();
 		}
 
 		function getLibrary() {
@@ -50,6 +67,12 @@
 			}, function(error) {
 				console.error('Controller getLibrary() got error: ', error)
 				// error
+			});
+		}
+
+		function getTags() {
+			trackService.getTags().then(function(tags) {
+				vm.taglist = tags;
 			});
 		}
 
@@ -69,6 +92,79 @@
 
 		}
 
+		function hover(track) {
+			vm.hovered = track._id;
+		}
+
+		function unhover() {
+			console.log('unhovering')
+			vm.hovered = null;
+		}
+
+		function addTag(track, tag) {
+			var newTags = track.tags.concat([tag]);
+			var param = { tags : newTags };
+
+			console.log('sending tag data', param);
+
+			trackService.update(track, param).then(function(updatedTrack) {
+				$scope.subtracks[track.origIdx].tags = newTags;
+				vm.tag = null;
+			}, function(error) {
+				vm.tag = null;
+			});
+		}
+
+		function removeTag(track, tag) {
+			var newTags = _.without(track.tags, tag);
+			var param = { tags : newTags };
+
+			trackService.update(track, param).then(function(updatedTrack) {
+				$scope.subtracks[track.origIdx].tags = newTags;
+			}, function(error) {
+				// do nothing
+			});
+		}
+
+		function toggleTag(tag) {
+			var idx = vm.filteredTags.indexOf(tag);
+			if (idx >= 0) {
+				console.log('removing tag ', tag);
+				vm.filteredTags.splice(idx, 1);
+			} else {
+				console.log('adding tag ', tag);
+				vm.filteredTags.push(tag);
+			}
+		}
+
+		function setRating(track, newRating) {
+			console.log('setting rating');
+			var param = { rating : newRating };
+			trackService.update(track, param).then(function(updatedTrack) {
+				$scope.subtracks[track.origIdx].rating = newRating;
+			});
+		}
+
+		function hoverNoteIcon(track) {
+			console.log('hovering note', track);
+			vm.hoveredNote = track._id;
+		}
+
+		function unhoverNoteIcon() {
+			console.log('unhovering note')
+			vm.hoveredNote = null;
+		}
+
+		function addNote(track, newNote) {
+			
+			var param = { note : newNote };
+			console.log('adding note', param);
+			trackService.update(track, param).then(function(updatedTrack) {
+				track.name = newNote;
+				vm.note = '';
+			});
+		}
+
 		function openImport(src) {
 			var tplUrl, ctrl;
 			if (src === 'yt') {
@@ -84,7 +180,7 @@
 				templateUrl	: tplUrl,
 				controller 	: ctrl,
 				windowClass : 'modalFit',
-				size 		: 'lg',
+				//size 		: 'lg',
 				resolve 	: {
 					items: function () {
 						//
@@ -144,11 +240,46 @@
 		init();
 	}
 
-	function TypeFilter() {
-		return function(tracks, filters) {
+	function TagFilter()  {
+		return function(tracks, tags) {
+
+			if (tags.length === 0) return tracks;
+
 			var filtered = [];
 
 			angular.forEach(tracks, function(track, idx) {
+				var intersect = _.intersection(tags, track.tags);
+				if (intersect.length > 0) {
+					filtered.push(track);
+				}
+			});
+
+			return filtered;
+		}
+	}
+
+	function TypeFilter() {
+		
+		return function(tracks, filters) {
+
+			// check if any filters are applied
+			var hasFilter = false;
+
+			for (var type in filters.src) {
+				if (type === false) {
+					hasFilter = true;
+					break;
+				}
+			}
+
+			if (!hasFilter) return tracks;
+
+			// select tracks according to filter
+			var filtered = [];
+
+			angular.forEach(tracks, function(track, idx) {
+				//console.log('checking type filter ' + count);
+				count++;
 				if (filters.src[track.src] === true) {
 					track.origIdx = idx;
 					filtered.push(track);
@@ -169,5 +300,6 @@
 			});
 		}])
 		.controller('LibraryController', ['$log', '$scope', '$modal', 'LibraryService', 'TrackService', 'SCService', LibraryController])
-		.filter('typeFilter', TypeFilter);
+		.filter('typeFilter', TypeFilter)
+		.filter('tagFilter', TagFilter);
 })();

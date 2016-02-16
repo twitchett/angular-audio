@@ -32,6 +32,7 @@
 				src_url 	: null,
 				stream_url	: null,
 				img_url		: null,
+				note		: '',
 
 				// ui-attributes: front end only
 				ui : {
