@@ -58,7 +58,7 @@
 			let service = req.params.service;
 
 			if (!(service === 'sc' || service === 'yt')) {
-				return next(new Error('error: unrecognised sevicecode parameter');
+				return next(new Error('error: unrecognised sevicecode parameter'));
 			}
 
 			User.setAccessToken(service, null).then(

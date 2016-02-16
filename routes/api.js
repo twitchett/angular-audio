@@ -142,7 +142,7 @@
 			Track.findOneAndUpdate
 			(
 				{ userId : userId, _id : trackId },
-				{ $addToSet : data },
+				{ $set : data },
 				{ new : true }
 			)
 			.exec()
